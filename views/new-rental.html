@@ -4,21 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>New Rental - Luxtronic Rental</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="/" class="brand">Luxtronic Rental</a>
-    <nav>
-      <a href="/">Dashboard</a>
-      <a href="/inventory">Inventory</a>
-      <a href="/customers">Customers</a>
-      <a href="/rental-history">History</a>
-      <a href="/new-rental" class="btn-accent">+ New Rental</a>
-    </nav>
+<header class="header">
+  <div class="logo-container">
+    <img src="/images/logo.png" alt="Luxtronic" class="logo-img">
+    <a href="/" class="brand-name">LUXTRONIC</a>
+    <span class="tagline">Rental Tracker</span>
   </div>
+  <div class="dark-mode-toggle" id="darkModeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
 </header>
+<nav class="nav-bar">
+  <a href="/" class="nav-item"><i class="fas fa-gauge-high"></i><span class="nav-text">Dashboard</span></a>
+  <a href="/inventory" class="nav-item"><i class="fas fa-desktop"></i><span class="nav-text">Inventory</span></a>
+  <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
+  <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
+  <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
+</nav>
 <main>
   <h1>New Rental</h1>
   <p class="subtitle">Check out an available unit to a customer.</p>

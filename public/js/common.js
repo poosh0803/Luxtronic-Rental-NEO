@@ -31,9 +31,29 @@ function statusBadge(status) {
 
 function highlightNav() {
   const path = window.location.pathname;
-  document.querySelectorAll('.topbar nav a[href]').forEach((a) => {
+  document.querySelectorAll('.nav-bar a.nav-item[href]').forEach((a) => {
     if (a.getAttribute('href') === path) a.classList.add('active');
   });
+}
+
+function initDarkMode() {
+  const toggle = document.getElementById('darkModeToggle');
+  const icon = document.getElementById('themeIcon');
+  const applyTheme = (dark) => {
+    document.body.classList.toggle('dark-mode', dark);
+    if (icon) {
+      icon.classList.toggle('fa-moon', !dark);
+      icon.classList.toggle('fa-sun', dark);
+    }
+  };
+  applyTheme(localStorage.getItem('theme') === 'dark');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const dark = !document.body.classList.contains('dark-mode');
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+      applyTheme(dark);
+    });
+  }
 }
 
 function escapeHtml(str) {
@@ -45,4 +65,7 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-document.addEventListener('DOMContentLoaded', highlightNav);
+document.addEventListener('DOMContentLoaded', () => {
+  highlightNav();
+  initDarkMode();
+});
