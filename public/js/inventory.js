@@ -51,8 +51,8 @@ async function loadUnits() {
           <td>${statusBadge(u.status)}</td>
           <td>${u.open_customer_name ? escapeHtml(u.open_customer_name) + ' (due ' + formatDate(u.open_due_date) + ')' : '-'}</td>
           <td>
-            <a class="btn btn-sm" href="/unit-detail?id=${u.id}">History</a>
-            <button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button>
+            <a class="btn btn-sm btn-fixed" href="/unit-detail?id=${u.id}">History</a>
+            <button class="btn btn-sm btn-fixed" onclick="editUnit(${u.id})">Edit</button>
           </td>
         </tr>`
       )

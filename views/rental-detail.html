@@ -24,8 +24,11 @@
   <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
 </nav>
 <main>
-  <h1 id="pageTitle">Rental Detail</h1>
-  <div id="overdueBanner" class="alert alert-danger" style="display:none;"></div>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <h1 id="pageTitle">Rental Detail</h1>
+    <a class="btn btn-primary" id="printLink" href="#" target="_blank">Print Rental Agreement</a>
+  </div>
+  <div id="overdueBanner" class="alert alert-danger" style="display:none; margin-top:16px;"></div>
   <div id="loadError"></div>
 
   <div class="grid-2">
@@ -60,10 +63,6 @@
       <button class="btn btn-danger" id="markReturnedBtn">Mark Returned</button>
     </div>
     <div id="returnError"></div>
-  </div>
-
-  <div class="actions-bar">
-    <a class="btn btn-primary" id="printLink" href="#" target="_blank">Print Rental Agreement</a>
   </div>
 </main>
 <script src="/js/common.js"></script>

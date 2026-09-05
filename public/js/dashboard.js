@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const daysLate = Math.floor((Date.now() - new Date(r.due_date).getTime()) / 86400000);
           return `<tr class="clickable" onclick="location.href='/rental-detail?id=${r.id}'">
             <td>${escapeHtml(r.unit_label)}</td>
+            <td>${r.unit_type === 'laptop' ? 'Laptop' : 'Desktop'}</td>
             <td>${escapeHtml(r.customer_name)}</td>
             <td>${formatDate(r.due_date)}</td>
             <td>${daysLate}</td>
