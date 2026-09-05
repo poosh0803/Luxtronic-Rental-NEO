@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental Detail - Luxtronic Rental</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">Luxtronic Rental</a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/inventory">Inventory</a>
+      <a href="/customers">Customers</a>
+      <a href="/new-rental" class="btn-accent">+ New Rental</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <h1 id="pageTitle">Rental Detail</h1>
+  <div id="overdueBanner" class="alert alert-danger" style="display:none;"></div>
+  <div id="loadError"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Unit</h2>
+      <div id="unitInfo"></div>
+    </div>
+    <div class="panel">
+      <h2>Customer</h2>
+      <div id="customerInfo"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Rental Terms</h2>
+    <div id="termsInfo"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Condition Photos</h2>
+    <h2 style="font-size:14px; color:var(--muted);">Checkout</h2>
+    <div class="photo-grid" id="checkoutPhotos"></div>
+    <h2 style="font-size:14px; color:var(--muted); margin-top:16px;">Return</h2>
+    <div class="photo-grid" id="returnPhotos"></div>
+  </div>
+
+  <div class="panel" id="returnPanel">
+    <h2>Return this unit</h2>
+    <label for="returnPhotoInput">Return condition photos (optional)</label>
+    <input type="file" id="returnPhotoInput" accept="image/*" multiple>
+    <div class="actions-bar">
+      <button class="btn btn-danger" id="markReturnedBtn">Mark Returned</button>
+    </div>
+    <div id="returnError"></div>
+  </div>
+
+  <div class="actions-bar">
+    <a class="btn btn-primary" id="printLink" href="#" target="_blank">Print Rental Agreement</a>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/rentalDetail.js"></script>
+</body>
+</html>

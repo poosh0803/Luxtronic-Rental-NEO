@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental Agreement</title>
+<link rel="stylesheet" href="/css/print.css">
+</head>
+<body>
+<div class="toolbar">
+  <span id="toolbarStatus">Loading rental...</span>
+  <button onclick="window.print()">Print</button>
+</div>
+
+<div class="page" id="page">
+  <div class="letterhead">
+    <img src="/images/logo.png" alt="Luxtronic">
+    <h1>Rental Agreement</h1>
+  </div>
+
+  <div class="agreement-date">This Rental Agreement ("Agreement") is made on <span class="fill" id="agreementDate">___/___/20___</span></div>
+
+  <div class="parties">
+    <div class="party">
+      <strong class="role">Lessee</strong>
+      <div class="field-line">Renter Name: <span class="fill" id="lesseeName"></span></div>
+      <div class="field-line">Address: <span class="fill" id="lesseeAddress"></span></div>
+      <div class="field-line">Phone: <span class="fill" id="lesseePhone"></span></div>
+      <div class="field-line">(Hereinafter referred to as the "Lessee")</div>
+    </div>
+    <div class="party">
+      <strong class="role">Lessor</strong>
+      <div class="field-line" id="lessorName">LUXTRONIC PTY LTD</div>
+      <div class="field-line">ABN <span id="lessorAbn"></span></div>
+      <div class="field-line" id="lessorAddress"></div>
+      <div class="field-line">Ph: <span id="lessorPhone"></span></div>
+      <div class="field-line">Email: <span id="lessorEmail"></span></div>
+      <div class="field-line">(Hereinafter referred to as the "Lessor")</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">Equipment Description</h3>
+  <p>The Lessor agrees to rent to the Lessee the following equipment:</p>
+  <div class="field-line">
+    <span class="check-item"><span class="check-box" id="checkLaptop"></span>Laptop</span>
+    <span class="check-item"><span class="check-box" id="checkDesktop"></span>Desktop PC</span>
+  </div>
+  <div class="field-line">Make/Model: <span class="fill" id="equipMakeModel"></span></div>
+  <div class="field-line">Serial Number: <span class="fill" id="equipSerial"></span></div>
+  <div class="field-line">
+    Accessories Included:
+    <span class="check-item"><span class="check-box" id="checkCharger"></span>Charger</span>
+    <span class="check-item"><span class="check-box" id="checkBag"></span>Bag</span>
+    <span class="check-item"><span class="check-box" id="checkPowerbank"></span>Powerbank</span>
+    <span class="check-item"><span class="check-box" id="checkOther"></span>Other: <span class="fill" id="accessoryOtherText"></span></span>
+  </div>
+
+  <h3 class="section-title">1. Rental Period</h3>
+  <p>From <span class="fill" id="periodFrom"></span> to <span class="fill" id="periodTo"></span></p>
+  <p>The rental period shall commence on the period shown above. The rental may be extended upon mutual agreement in writing. Please note the late return penalty $20 AUD per calendar day will apply if the rental device does not return on time.</p>
+
+  <h3 class="section-title">2. Rental Payment</h3>
+  <p>The Lessee agrees to pay the Lessor a rental fee of <span class="fill" id="rentalFeeText"></span>.</p>
+  <p>Payment Due Date: Payment is due when rental started.</p>
+  <p>Payment Method: Payment shall be made via cash, credit card or bank transfer.</p>
+
+  <h3 class="section-title">3. Security Bond</h3>
+  <p>A security Bond of $<span class="fill" id="securityBondText"></span> is required before the equipment is handed over. This bond will be refunded within 3 business days after the equipment is returned in good condition, subject to deductions for any damages or missing items. The refund method is the same as how it was paid.</p>
+
+  <h3 class="section-title">4. Use of Equipment</h3>
+  <p>The Lessee agrees to use the Equipment only for its intended purpose and in a reasonable way. Specifically, the Lessee must:</p>
+  <ul>
+    <li>Use the Equipment solely for lawful purposes.</li>
+    <li>Not modify, tamper with, or alter the Equipment (including overclocking, changing BIOS settings, or making hardware customizations) without the Lessor's prior written consent.</li>
+    <li>Not expose the Equipment to conditions or actions that could reasonably cause damage, such as extreme heat, liquids, physical impacts, or installation of unauthorized or incompatible software.</li>
+    <li>Follow all manufacturer instructions, safety guidelines, and any specific advice provided by the Lessor (e.g., avoiding software that may conflict with the Equipment, like certain game servers or anti-cheat tools that could lead to hardware issues such as motherboard blocking).</li>
+    <li>Notify the Lessor immediately (within 24 hours) of any warnings, errors, compatibility issues, or potential risks from external services (e.g., game servers) that might affect the Equipment.</li>
+  </ul>
+  <p>Failure to comply may result in the Lessee being responsible for any resulting damage, subject to the consumer guarantees in Section 12.</p>
+
+  <h3 class="section-title">5. Maintenance and Repairs</h3>
+  <p>The Lessee must take reasonable care of the Equipment during the Rental Period.</p>
+  <p><strong>Lessee's Responsibilities:</strong> Perform basic routine maintenance, such as keeping the Equipment clean, ensuring proper ventilation, and maintaining battery charge if applicable. Report any malfunction, damage, or unusual performance to the Lessor immediately (within 24 hours).</p>
+  <p><strong>Lessor's Responsibilities:</strong> Cover the cost of repairs for fair wear and tear or issues arising from the Equipment's inherent defects, in line with consumer guarantees (see Section 12).</p>
+  <p><strong>Costs for Damage:</strong> If damage occurs due to the Lessee's negligence, misuse, or failure to follow guidelines (e.g., unauthorized modifications leading to hardware failure), the Lessee must pay reasonable costs for inspection, repair, or replacement. This includes scenarios where the Lessee's actions contribute to issues from external factors, such as game server interactions (e.g., firmware locks or blocking causing motherboard damage).</p>
+
+  <p><strong>5.1 Determining Cause and Costs</strong> The Lessor will inspect the Equipment (at a reasonable time and place) to determine the cause of any issue, using evidence like logs, photos, or expert reports. If the damage is solely due to an external factor (e.g., a game server issue) and the Lessee has followed all guidelines, the Lessor will cover reasonable costs. If the Lessee contributed (e.g., by ignoring warnings or installing conflicting software), the Lessee will pay as per the table below. Invoices must be paid within 7 days. The Lessee may dispute charges through the process in Section 13.</p>
+
+  <p><strong>Schedule A: Repair and Replacement Costs (in AUD, GST inclusive)</strong></p>
+  <table class="schedule-a">
+    <thead><tr><th>Item</th><th>Cost</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Diagnostics/Inspection</td><td>$75</td><td>Waived if no Lessee fault.</td></tr>
+      <tr><td>Minor Repair (software fix)</td><td>$150 (min. 1hr)</td><td>Billed per hour thereafter.</td></tr>
+      <tr><td>Motherboard Replacement</td><td>$350</td><td>Includes labour for standard model.</td></tr>
+      <tr><td>Display panel</td><td>$600-$1000</td><td>Includes labour for standard type.</td></tr>
+      <tr><td>Full Equipment Replacement</td><td>$1,500-$2000</td><td>If irreparable.</td></tr>
+      <tr><td>Downtime (per day)</td><td>$50</td><td>Only if due to Lessee fault, for lost rental time.</td></tr>
+    </tbody>
+  </table>
+  <p>These costs are estimates and will be based on actual expenses. The Lessor will provide a detailed quote before proceeding.</p>
+
+  <h3 class="section-title">6. Liability and Indemnity</h3>
+  <p>Both parties must act reasonably and comply with their obligations under this Agreement and the Australian Consumer Law (ACL).</p>
+  <p>The Lessee is responsible for the Equipment from receipt until return, including protecting it from loss or theft. The Lessee must return it in the same condition as received (allowing for fair wear and tear).</p>
+  <p>The Lessor is not liable for any indirect, consequential, or incidental losses (e.g., lost data or profits) arising from the Equipment's use, except where required by law.</p>
+  <p>The Lessee agrees to indemnify the Lessor against claims or losses directly caused by the Lessee's negligent or intentional misuse of the Equipment (e.g., third-party claims from game developers due to unauthorized actions). This does not apply to claims arising from the Lessor's failure to meet consumer guarantees.</p>
+  <p><strong>Hardware-Specific Risks:</strong> The Lessee acknowledges risks from third-party interactions (e.g., game servers causing hardware conflicts). The Lessor will assist where possible, but liability follows Section 5.1.</p>
+
+  <h3 class="section-title">7. Termination</h3>
+  <p>Either party may end this Agreement by giving at least 7 calendar days' written notice.</p>
+  <p>The Lessor may end it immediately if the Lessee breaches a material term (e.g., non-payment or misuse causing damage) and does not remedy it within a reasonable time after notice. In such cases, the Lessee must return the Equipment promptly and pay any outstanding fees or costs.</p>
+  <p>Upon termination, the Lessee must return the Equipment to <span id="returnAddress"></span>. A final inspection will occur within 48 hours.</p>
+
+  <h3 class="section-title">8. Governing Law</h3>
+  <p>This Agreement is governed by the laws of New South Wales, Australia, including the Australian Consumer Law. Any disputes will be resolved primarily through negotiation, then mediation via NSW Fair Trading if needed. Court proceedings may follow in the courts of New South Wales.</p>
+
+  <h3 class="section-title">9. Additional Terms</h3>
+  <p><strong>Insurance:</strong> The Lessee is encouraged (but not required) to obtain insurance covering loss, theft, or damage to the Equipment during the Rental Period. If insured, provide details to the Lessor.</p>
+  <p><strong>Return Condition:</strong> The Equipment must be returned clean and functional, barring fair wear and tear. Failure to do so may incur cleaning or repair fees per Schedule A.</p>
+  <p><strong>Inspections:</strong> The Lessor may inspect the Equipment at reasonable times with 24 hours' notice, or immediately if misuse is suspected.</p>
+  <p>Late return penalty $20 per calendar day will apply if the rental device does not return on time (after the trading hours of return day).</p>
+
+  <div class="page-break"></div>
+
+  <h3 class="section-title">10. Data and Privacy</h3>
+  <p>The Lessor respects the Lessee's privacy and complies with the Privacy Act 1988 (Cth) and the Australian Privacy Principles (APPs).</p>
+  <p><strong>10.1 Data on Equipment</strong> The Lessee is fully responsible for any data stored, processed, or backed up on the Equipment. The Lessor is not liable for data loss, corruption, or unauthorised access, including from misuse, hardware failure, or external interactions (e.g., game servers). The Lessee must back up data regularly and before returning the Equipment.</p>
+  <p><strong>10.2 Collection and Use of Personal Information</strong> The Lessor may collect basic personal information (e.g., full name, address, phone number, email, identification such as student ID or passport, and payment details) necessary to manage the rental. This information will only be used for:</p>
+  <ul>
+    <li>Processing the rental, security bond, and payments;</li>
+    <li>Communicating about the Agreement, Equipment issues, or extensions;</li>
+    <li>Legal compliance, record-keeping, and dispute resolution;</li>
+    <li>Any other purpose directly related to the rental service or required by law.</li>
+  </ul>
+  <p><strong>10.3 Protection and Disclosure</strong> The Lessor takes reasonable steps to protect personal information but cannot guarantee against all risks. Information will not be shared with third parties without consent, except:</p>
+  <ul>
+    <li>With service providers (e.g., payment processors, repair technicians) under strict confidentiality agreements; or</li>
+    <li>As required or authorised by law.</li>
+  </ul>
+  <p><strong>10.4 Acknowledgement and Express Consent</strong> The Lessee acknowledges that they have read and understood this Privacy clause.</p>
+  <p>By signing this Agreement, the Lessee expressly consents to Luxtronic Pty Ltd (the Lessor): (a) collecting, holding, using, and disclosing the Lessee's personal information for the purposes listed in clause 10.2; (b) disclosing that information to necessary third-party service providers where required to deliver the rental service; and (c) retaining the information for as long as necessary to fulfil the rental Agreement and legal obligations (and destroying or de-identifying it when it is no longer needed).</p>
+  <p>The Lessee understands that:</p>
+  <ul>
+    <li>If they do not provide the requested personal information, the Lessor may be unable to provide the rental service or process the security bond.</li>
+    <li>They can request access to, correction of, or (where lawful) deletion of their personal information by contacting the Lessor.</li>
+    <li>They may withdraw their consent at any time by written notice, but withdrawal may affect the Lessor's ability to continue the rental or process refunds/returns.</li>
+  </ul>
+  <p>For privacy complaints, the Lessee should first contact the Lessor. If unresolved, they may contact the Office of the Australian Information Commissioner (OAIC) on 1300 302 502 or visit www.oaic.gov.au.</p>
+
+  <h3 class="section-title">11. Consumer Guarantees and Remedies</h3>
+  <p>This Agreement does not limit the Lessee's rights under the Australian Consumer Law. The Lessor guarantees that:</p>
+  <ul>
+    <li>The Equipment is of acceptable quality, fit for its disclosed purpose, and matches any description.</li>
+    <li>Rental services will be provided with due care and skill.</li>
+  </ul>
+  <p>If these guarantees are not met (e.g., Equipment fails unreasonably early), the Lessee may seek a repair, replacement, refund, or compensation, depending on the issue's severity. Contact the Lessor first for resolution. If unsatisfied, escalate to NSW Fair Trading (13 32 20) or the ACCC (1300 302 502).</p>
+
+  <h3 class="section-title">12. Dispute Resolution</h3>
+  <p>Any dispute must first be discussed in good faith. If unresolved:</p>
+  <ul>
+    <li>Refer to free mediation via NSW Fair Trading.</li>
+    <li>Small claims can go to the NSW Civil and Administrative Tribunal (NCAT).</li>
+  </ul>
+  <p>The Lessor agrees not to pursue legal action for disputes under $10,000 without prior mediation.</p>
+
+  <h3 class="section-title">13. Acknowledgment and Signatures</h3>
+  <p>The parties confirm they have read, understood, and agree to these terms. This Agreement is fair, transparent, and complies with Australian consumer laws.</p>
+  <p><strong>Schedules:</strong> Schedule A: Repair and Replacement Costs (above). Schedule B: Equipment Details and Condition Report (attach photos/inventory).</p>
+
+  <div class="signature-block">
+    <div class="party">
+      <div>Lessor: Luxtronic Pty Ltd (ABN <span id="lessorAbn2"></span>)</div>
+      <div class="field-line">Sign: ___________________________</div>
+      <div class="field-line">Date: ___________________________</div>
+    </div>
+    <div class="party">
+      <div>Lessee</div>
+      <div class="field-line">Printed name: <span class="fill" id="lesseeNameSign"></span></div>
+      <div class="field-line">Sign: ___________________________</div>
+      <div class="field-line">Date of pick up: ___________________________</div>
+    </div>
+  </div>
+
+  <div class="ack-box">
+    Client Acknowledgement of System Condition: I hereby confirm that the computer (laptop/desktop) was received in a clean condition with a newly reset operating system, and that NO remote access software or third-party applications were installed by Luxtronic Pty Ltd at the time of handover. I accept full responsibility for any software subsequently installed and for all activity conducted on the device during the rental period.
+  </div>
+</div>
+
+<script src="/js/common.js"></script>
+<script src="/js/printAgreement.js"></script>
+</body>
+</html>

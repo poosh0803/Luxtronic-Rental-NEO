@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers - Luxtronic Rental</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">Luxtronic Rental</a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/inventory">Inventory</a>
+      <a href="/customers">Customers</a>
+      <a href="/new-rental" class="btn-accent">+ New Rental</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <h1>Customers</h1>
+  <p class="subtitle">Search by name or phone number.</p>
+
+  <div class="panel">
+    <input type="text" id="searchInput" placeholder="Search name or phone...">
+  </div>
+
+  <div class="panel">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Address</th><th></th></tr></thead>
+      <tbody id="customersBody"></tbody>
+    </table>
+    <div id="customersEmpty" class="empty" style="display:none;">No customers found.</div>
+  </div>
+
+  <div class="panel" id="detailPanel" style="display:none;">
+    <h2 id="detailName"></h2>
+    <p class="subtitle" id="detailContact"></p>
+    <h2>Rental History</h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Start</th><th>Due</th><th>Returned</th></tr></thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+    <div id="historyEmpty" class="empty" style="display:none;">No rentals yet.</div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/customers.js"></script>
+</body>
+</html>

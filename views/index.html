@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Luxtronic Rental</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="brand">Luxtronic Rental</a>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/inventory">Inventory</a>
+      <a href="/customers">Customers</a>
+      <a href="/new-rental" class="btn-accent">+ New Rental</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <h1>Dashboard</h1>
+  <p class="subtitle">Units currently rented out, and anything overdue.</p>
+
+  <div id="overdueSection" class="panel" style="display:none;">
+    <h2 style="color:var(--danger);">Overdue</h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Customer</th><th>Due Date</th><th>Days Late</th><th></th></tr></thead>
+      <tbody id="overdueBody"></tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Currently Rented Out</h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Type</th><th>Customer</th><th>Start</th><th>Due Back</th><th></th></tr></thead>
+      <tbody id="activeBody"></tbody>
+    </table>
+    <div id="activeEmpty" class="empty" style="display:none;">Nothing is currently rented out.</div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+body { margin: 0; background: #e5e7eb; font-family: Arial, Helvetica, sans-serif; color: #111; }
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  background: #1f2937;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+.toolbar button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.toolbar span { font-size: 14px; }
+
+.page {
+  max-width: 800px;
+  margin: 24px auto;
+  background: #fff;
+  padding: 40px 48px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.letterhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.letterhead img { height: 70px; }
+.letterhead h1 { font-size: 26px; margin: 0; font-family: Arial Black, Arial, sans-serif; }
+
+.agreement-date { margin: 18px 0; font-weight: bold; }
+
+.parties { display: flex; justify-content: space-between; gap: 30px; margin: 14px 0 22px; }
+.party { flex: 1; }
+.party strong.role { font-weight: bold; display: block; margin-bottom: 4px; }
+
+h3.section-title {
+  font-size: 13px;
+  margin: 18px 0 6px;
+  border-bottom: 1px solid #999;
+  padding-bottom: 3px;
+}
+
+.field-line { margin: 4px 0; }
+.field-line .fill { border-bottom: 1px solid #000; display: inline-block; min-width: 160px; padding: 0 3px; }
+
+.check-box {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1.3px solid #000;
+  margin-right: 5px;
+  position: relative;
+  vertical-align: middle;
+  top: -1px;
+}
+.check-box.checked::after {
+  content: '✓';
+  position: absolute;
+  left: 1px;
+  top: -5px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.check-item { margin-right: 16px; white-space: nowrap; }
+
+table.schedule-a { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 11.5px; }
+table.schedule-a th, table.schedule-a td { border: 1px solid #999; padding: 5px 7px; text-align: left; }
+table.schedule-a th { background: #f3f4f6; }
+
+.privacy, .clause p { margin: 6px 0; }
+.clause ul { margin: 4px 0; padding-left: 20px; }
+
+.signature-block { display: flex; justify-content: space-between; gap: 30px; margin-top: 26px; }
+.signature-block .party { border-top: 1px solid #000; padding-top: 4px; }
+
+.ack-box { border: 1px solid #999; padding: 10px 14px; margin-top: 20px; font-size: 11.5px; }
+
+.page-break { page-break-before: always; }
+
+@media print {
+  body { background: #fff; }
+  .toolbar { display: none; }
+  .page { box-shadow: none; margin: 0; max-width: none; padding: 0.4in 0.5in; }
+}

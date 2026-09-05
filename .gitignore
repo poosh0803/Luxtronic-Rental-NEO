@@ -1,0 +1,9 @@
+node_modules/
+.env
+logs/
+uploads/
+!uploads/.gitkeep
+
+# Transient reference file used only to understand PC specs during planning;
+# not part of the project and will be deleted from the working tree.
+rental pc record.xlsx
