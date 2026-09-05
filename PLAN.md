@@ -82,4 +82,6 @@ Two demo rows in `docker/init-scripts/002_seed.sql`: one desktop unit (label "De
 
 ## Status
 
-Implemented and verified end-to-end (2026-09-05): inventory, checkout/return, double-booking prevention, overdue detection, customer search/history, and the print-agreement page were all driven through a live browser session against the seeded data. Not yet done: git init/remote and the actual LAN deploy (still awaiting go-ahead, per "Not building now" above).
+Implemented and verified end-to-end (2026-09-05): inventory, checkout/return, double-booking prevention, overdue detection, customer search/history, and the print-agreement page were all driven through a live browser session against the seeded data. Repo is git-initialized with an initial commit. Not yet done: GitHub remote/push and the actual LAN deploy (still awaiting go-ahead, per "Not building now" above).
+
+**Added after initial build (2026-09-05):** a per-unit detail page (`views/unit-detail.html`, linked from Inventory) showing that unit's full rental history, and a site-wide `views/rental-history.html` listing every rental ever recorded across all units, newest first. Backed by an extended `GET /api/units/:id` (now also returns that unit's rentals) and the existing `GET /api/rentals` (already sorted newest-first).

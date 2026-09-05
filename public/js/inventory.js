@@ -43,14 +43,17 @@ async function loadUnits() {
     body.innerHTML = units
       .map(
         (u) => `<tr>
-          <td>${escapeHtml(u.label)}</td>
+          <td><a href="/unit-detail?id=${u.id}">${escapeHtml(u.label)}</a></td>
           <td>${u.type === 'laptop' ? 'Laptop' : 'Desktop'}</td>
           <td>${renderSpecsList(u.specs)}</td>
           <td>${escapeHtml(u.serial_number) || '-'}</td>
           <td>${u.estimate_value ? '$' + Number(u.estimate_value).toFixed(2) : '-'}</td>
           <td>${statusBadge(u.status)}</td>
           <td>${u.open_customer_name ? escapeHtml(u.open_customer_name) + ' (due ' + formatDate(u.open_due_date) + ')' : '-'}</td>
-          <td><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button></td>
+          <td>
+            <a class="btn btn-sm" href="/unit-detail?id=${u.id}">History</a>
+            <button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button>
+          </td>
         </tr>`
       )
       .join('');

@@ -21,14 +21,20 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get one unit
+// Get one unit, plus its full rental history (newest first)
 router.get('/:id', async (req, res) => {
   try {
     const { rows } = await pool.query(`${UNIT_SELECT_WITH_OPEN_RENTAL} WHERE u.id = $1`, [req.params.id]);
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Unit not found' });
     }
-    res.json({ success: true, unit: attachStatus(rows[0]) });
+    const { rows: rentals } = await pool.query(
+      `SELECT r.*, c.full_name AS customer_name, c.phone AS customer_phone
+       FROM rentals r JOIN customers c ON c.id = r.customer_id
+       WHERE r.unit_id = $1 ORDER BY r.start_date DESC`,
+      [req.params.id]
+    );
+    res.json({ success: true, unit: attachStatus(rows[0]), rentals });
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch unit', error: error.message });
