@@ -1,5 +1,22 @@
+let currentRental = null;
+
 function getRentalId() {
   return new URLSearchParams(window.location.search).get('id');
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  // node-postgres parses DATE columns as a JS Date at *local* midnight, so
+  // the serialized ISO string's UTC time component is shifted by the
+  // server's timezone offset (e.g. "2026-08-27" becomes
+  // "...T14:00:00.000Z" for AEST). Reading the date back with local
+  // getters (not UTC ones) undoes that shift - the same way formatDate()
+  // in common.js already renders it correctly elsewhere on this page.
+  const d = new Date(value);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 function specsList(specs) {
@@ -15,7 +32,9 @@ async function load() {
 
   try {
     const { rental, photos } = await fetchJSON(`/api/rentals/${id}`);
+    currentRental = rental;
     document.getElementById('pageTitle').textContent = `Rental: ${rental.unit_label}`;
+    document.getElementById('rentalEditForm').style.display = 'none';
 
     const isOverdue = !rental.returned_at && new Date(rental.due_date) < new Date(new Date().toDateString());
     if (isOverdue) {
@@ -77,6 +96,59 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       await fetchJSON(`/api/rentals/${id}/return`, { method: 'PUT' });
       load();
+    } catch (err) {
+      errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+  });
+
+  document.getElementById('editRentalBtn').addEventListener('click', () => {
+    if (!currentRental) return;
+    document.getElementById('editStartDate').value = toDateInputValue(currentRental.start_date);
+    document.getElementById('editDueDate').value = toDateInputValue(currentRental.due_date);
+    document.getElementById('editRentalFee').value = currentRental.rental_fee || '';
+    document.getElementById('editFeeFrequency').value = currentRental.fee_frequency || 'day';
+    document.getElementById('editSecurityBond').value = currentRental.security_bond || '';
+    document.getElementById('editAccessoriesIncluded').value = currentRental.accessories_included || '';
+    document.getElementById('editNotes').value = currentRental.notes || '';
+    document.getElementById('rentalEditError').innerHTML = '';
+    document.getElementById('rentalEditForm').style.display = 'block';
+  });
+
+  document.getElementById('cancelRentalEditBtn').addEventListener('click', () => {
+    document.getElementById('rentalEditForm').style.display = 'none';
+  });
+
+  document.getElementById('saveRentalBtn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('rentalEditError');
+    errorEl.innerHTML = '';
+    try {
+      await fetchJSON(`/api/rentals/${getRentalId()}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start_date: document.getElementById('editStartDate').value,
+          due_date: document.getElementById('editDueDate').value,
+          rental_fee: document.getElementById('editRentalFee').value || null,
+          fee_frequency: document.getElementById('editFeeFrequency').value,
+          security_bond: document.getElementById('editSecurityBond').value || null,
+          accessories_included: document.getElementById('editAccessoriesIncluded').value,
+          notes: document.getElementById('editNotes').value,
+        }),
+      });
+      load();
+    } catch (err) {
+      errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+  });
+
+  document.getElementById('deleteRentalBtn').addEventListener('click', async () => {
+    if (!currentRental) return;
+    if (!confirm(`Delete this rental of "${currentRental.unit_label}" to "${currentRental.customer_name}"? This cannot be undone.`)) return;
+    const errorEl = document.getElementById('rentalDeleteError');
+    errorEl.innerHTML = '';
+    try {
+      await fetchJSON(`/api/rentals/${getRentalId()}`, { method: 'DELETE' });
+      location.href = '/rental-history';
     } catch (err) {
       errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
     }

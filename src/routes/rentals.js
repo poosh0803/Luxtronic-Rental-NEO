@@ -175,6 +175,33 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update a rental's terms (dates, fee, bond, accessories, notes) - not the
+// unit or customer, since reassigning those is really a different rental.
+router.put('/:id', async (req, res) => {
+  try {
+    const { start_date, due_date, rental_fee, fee_frequency, security_bond, accessories_included, notes } = req.body;
+    const { rows } = await pool.query(
+      `UPDATE rentals SET
+        start_date = COALESCE($1, start_date),
+        due_date = COALESCE($2, due_date),
+        rental_fee = COALESCE($3, rental_fee),
+        fee_frequency = COALESCE($4, fee_frequency),
+        security_bond = COALESCE($5, security_bond),
+        accessories_included = COALESCE($6, accessories_included),
+        notes = COALESCE($7, notes)
+      WHERE id = $8 RETURNING *`,
+      [start_date, due_date, rental_fee, fee_frequency, security_bond, accessories_included, notes, req.params.id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Rental not found' });
+    }
+    res.json({ success: true, message: 'Rental updated', rental: rows[0] });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update rental', error: error.message });
+  }
+});
+
 // Mark a rental returned
 router.put('/:id/return', async (req, res) => {
   try {
@@ -189,6 +216,25 @@ router.put('/:id/return', async (req, res) => {
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ success: false, message: 'Failed to return rental', error: error.message });
+  }
+});
+
+// Delete a rental entirely (e.g. entered in error). Cascades to its
+// condition photos in the DB; best-effort cleans up the uploaded files too.
+router.delete('/:id', async (req, res) => {
+  try {
+    const { rows: photos } = await pool.query(`SELECT file_path FROM rental_photos WHERE rental_id = $1`, [req.params.id]);
+    const { rowCount } = await pool.query(`DELETE FROM rentals WHERE id = $1`, [req.params.id]);
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Rental not found' });
+    }
+    photos.forEach((p) => {
+      fs.unlink(path.join(process.cwd(), p.file_path.replace(/^\//, '')), () => {});
+    });
+    res.json({ success: true, message: 'Rental deleted' });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete rental', error: error.message });
   }
 });
 

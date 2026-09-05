@@ -40,8 +40,41 @@
   </div>
 
   <div class="panel" id="detailPanel" style="display:none;">
-    <h2 id="detailName"></h2>
-    <p class="subtitle" id="detailContact"></p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h2 id="detailName"></h2>
+        <p class="subtitle" id="detailContact"></p>
+      </div>
+      <div class="actions-bar" style="margin-top:0;">
+        <button class="btn btn-sm" id="editCustomerBtn">Edit</button>
+        <button class="btn btn-sm btn-danger" id="deleteCustomerBtn">Delete</button>
+      </div>
+    </div>
+
+    <div id="customerEditForm" style="display:none;">
+      <div class="field-row">
+        <div>
+          <label for="editFullName">Full Name</label>
+          <input type="text" id="editFullName">
+        </div>
+        <div>
+          <label for="editPhone">Phone</label>
+          <input type="text" id="editPhone">
+        </div>
+      </div>
+      <label for="editAddress">Address</label>
+      <input type="text" id="editAddress">
+      <label for="editEmail">Email</label>
+      <input type="email" id="editEmail">
+      <div class="actions-bar">
+        <button class="btn btn-primary" id="saveCustomerBtn">Save</button>
+        <button class="btn" id="cancelCustomerEditBtn">Cancel</button>
+      </div>
+      <div id="customerEditError"></div>
+    </div>
+
+    <div id="customerDeleteError"></div>
+
     <h2>Rental History</h2>
     <table>
       <thead><tr><th>Unit</th><th>Start</th><th>Due</th><th>Returned</th></tr></thead>

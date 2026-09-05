@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const overdue = rentals.filter((r) => r.is_overdue);
     const onTime = rentals.filter((r) => !r.is_overdue);
 
+    document.getElementById('activeCount').textContent = ` (${rentals.length})`;
+
     if (overdue.length > 0) {
       overdueSection.style.display = 'block';
       overdueBody.innerHTML = overdue

@@ -58,4 +58,49 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update a customer's details
+router.put('/:id', async (req, res) => {
+  try {
+    const { full_name, phone, address, email } = req.body;
+    const { rows } = await pool.query(
+      `UPDATE customers SET
+        full_name = COALESCE($1, full_name),
+        phone = COALESCE($2, phone),
+        address = COALESCE($3, address),
+        email = COALESCE($4, email)
+      WHERE id = $5 RETURNING *`,
+      [full_name, phone, address, email, req.params.id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Customer not found' });
+    }
+    res.json({ success: true, message: 'Customer updated', customer: rows[0] });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update customer', error: error.message });
+  }
+});
+
+// Delete a customer - blocked if they have any rental history, so real
+// business records can't be silently orphaned/lost via the customer page.
+router.delete('/:id', async (req, res) => {
+  try {
+    const { rows: existingRentals } = await pool.query(`SELECT 1 FROM rentals WHERE customer_id = $1 LIMIT 1`, [req.params.id]);
+    if (existingRentals.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Cannot delete a customer with rental history. Delete their rentals first if you really need to remove them.',
+      });
+    }
+    const { rowCount } = await pool.query(`DELETE FROM customers WHERE id = $1`, [req.params.id]);
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Customer not found' });
+    }
+    res.json({ success: true, message: 'Customer deleted' });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete customer', error: error.message });
+  }
+});
+
 export default router;

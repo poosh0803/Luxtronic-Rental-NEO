@@ -43,8 +43,53 @@
   </div>
 
   <div class="panel">
-    <h2>Rental Terms</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0;">Rental Terms</h2>
+      <div class="actions-bar" style="margin-top:0;">
+        <button class="btn btn-sm" id="editRentalBtn">Edit</button>
+        <button class="btn btn-sm btn-danger" id="deleteRentalBtn">Delete</button>
+      </div>
+    </div>
     <div id="termsInfo"></div>
+
+    <div id="rentalEditForm" style="display:none; margin-top:16px;">
+      <div class="field-row">
+        <div>
+          <label for="editStartDate">Start Date</label>
+          <input type="date" id="editStartDate">
+        </div>
+        <div>
+          <label for="editDueDate">Due Date</label>
+          <input type="date" id="editDueDate">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label for="editRentalFee">Rental Fee ($)</label>
+          <input type="number" step="0.01" id="editRentalFee">
+        </div>
+        <div>
+          <label for="editFeeFrequency">Per</label>
+          <select id="editFeeFrequency">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+          </select>
+        </div>
+      </div>
+      <label for="editSecurityBond">Security Bond ($)</label>
+      <input type="number" step="0.01" id="editSecurityBond">
+      <label for="editAccessoriesIncluded">Accessories Included</label>
+      <input type="text" id="editAccessoriesIncluded">
+      <label for="editNotes">Notes</label>
+      <textarea id="editNotes" rows="3"></textarea>
+      <div class="actions-bar">
+        <button class="btn btn-primary" id="saveRentalBtn">Save</button>
+        <button class="btn" id="cancelRentalEditBtn">Cancel</button>
+      </div>
+      <div id="rentalEditError"></div>
+    </div>
+    <div id="rentalDeleteError"></div>
   </div>
 
   <div class="panel">
