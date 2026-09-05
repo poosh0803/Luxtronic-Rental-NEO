@@ -9,7 +9,7 @@ A LAN web app for Luxtronic's shop to track PC/laptop rentals — inventory, cus
 * **Frontend**: HTML, CSS, JavaScript (no build step)
 * **Backend**: Node.js, Express.js
 * **Database**: PostgreSQL
-* **Other**: RESTful API, multer for condition-photo uploads
+* **Other**: RESTful API, multer for condition-photo uploads, Font Awesome (icons, via CDN)
 
 ## Prerequisites
 
@@ -20,13 +20,20 @@ Before you begin, ensure you have the following installed:
 
 ## Installation & Setup
 
-### 1. Install dependencies
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/poosh0803/Luxtronic-Rental-NEO.git
+cd Luxtronic-Rental-NEO
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Set up the database
+### 3. Set up the database
 
 Start the PostgreSQL container:
 
@@ -47,7 +54,7 @@ You can connect with a database GUI (VS Code PostgreSQL extension, pgAdmin, Tabl
 
 > **Note:** the compose file sets an explicit project `name` and a uniquely-named volume on purpose — do not remove them. Several other Luxtronic repos keep `docker-compose.yml` in a folder also named `docker` with no project name set, which makes Docker Compose default them all to the same shared volume unless each one is named distinctly.
 
-### 3. Configure environment variables
+### 4. Configure environment variables
 
 ```bash
 cp .env.example .env
@@ -55,7 +62,7 @@ cp .env.example .env
 
 The defaults in `.env.example` already match the Docker setup above (DB port `5434`, etc.) and include the business details (name, ABN, address, phone, email) that get printed on the Lessor side of the rental agreement — update those if they ever change.
 
-### 4. Start the application
+### 5. Start the application
 
 Development mode (auto-restart on file changes):
 
@@ -91,10 +98,13 @@ Luxtronic-Rental-NEO/
 
 * Inventory of desktop and laptop rental units, with flexible per-type specs
 * Live unit status (Available / Rented Out / Overdue / In Repair / Retired) — double-booking a unit is blocked
-* Reusable customer profiles, searchable by name or phone, with rental history
+* Reusable customer profiles, searchable by name or phone, with rental history, editable, deletable (blocked if they have rental history)
 * Checkout flow with condition photos, return flow with condition photos and an overdue flag
-* Dashboard showing what's currently out and anything overdue
-* One-click print of a pre-filled Rental Agreement matching Luxtronic's contract, ready for the customer to sign on paper
+* Rentals are editable (dates, fee, bond, accessories, notes) and deletable
+* Per-unit rental history page, plus a site-wide rental history page listing every rental ever recorded, newest first
+* Dashboard showing what's currently out (with a running total) and anything overdue
+* One-click print of a pre-filled Rental Agreement matching Luxtronic's contract, with page numbers, ready for the customer to sign on paper
+* Light/dark theme toggle, matching the styling used across Luxtronic's other in-house tools
 
 ## Deployment
 

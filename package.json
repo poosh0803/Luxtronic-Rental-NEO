@@ -8,9 +8,17 @@
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/poosh0803/Luxtronic-Rental-NEO.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/poosh0803/Luxtronic-Rental-NEO/issues"
+  },
+  "homepage": "https://github.com/poosh0803/Luxtronic-Rental-NEO#readme",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
