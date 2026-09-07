@@ -34,6 +34,10 @@ CREATE TABLE rentals (
   returned_at TIMESTAMPTZ,
   rental_fee NUMERIC(10, 2),
   fee_frequency VARCHAR(10) CHECK (fee_frequency IN ('day', 'week', 'month')),
+  -- Actual amount agreed with the customer, when it differs from
+  -- rental_fee x period (e.g. a manual discount). NULL means "no override,
+  -- use the rate as-is".
+  final_fee NUMERIC(10, 2),
   security_bond NUMERIC(10, 2),
   accessories_included TEXT,
   notes TEXT,

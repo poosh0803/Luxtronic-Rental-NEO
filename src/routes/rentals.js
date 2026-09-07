@@ -113,6 +113,7 @@ router.post('/', async (req, res) => {
       due_date,
       rental_fee,
       fee_frequency,
+      final_fee,
       security_bond,
       accessories_included,
       notes,
@@ -159,9 +160,9 @@ router.post('/', async (req, res) => {
     }
 
     const rentalResult = await client.query(
-      `INSERT INTO rentals (unit_id, customer_id, start_date, due_date, rental_fee, fee_frequency, security_bond, accessories_included, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-      [unit_id, finalCustomerId, start_date, due_date, rental_fee || null, fee_frequency || null, security_bond || null, accessories_included || null, notes || null]
+      `INSERT INTO rentals (unit_id, customer_id, start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+      [unit_id, finalCustomerId, start_date, due_date, rental_fee || null, fee_frequency || null, final_fee || null, security_bond || null, accessories_included || null, notes || null]
     );
 
     await client.query('COMMIT');
@@ -179,18 +180,19 @@ router.post('/', async (req, res) => {
 // unit or customer, since reassigning those is really a different rental.
 router.put('/:id', async (req, res) => {
   try {
-    const { start_date, due_date, rental_fee, fee_frequency, security_bond, accessories_included, notes } = req.body;
+    const { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes } = req.body;
     const { rows } = await pool.query(
       `UPDATE rentals SET
         start_date = COALESCE($1, start_date),
         due_date = COALESCE($2, due_date),
         rental_fee = COALESCE($3, rental_fee),
         fee_frequency = COALESCE($4, fee_frequency),
-        security_bond = COALESCE($5, security_bond),
-        accessories_included = COALESCE($6, accessories_included),
-        notes = COALESCE($7, notes)
-      WHERE id = $8 RETURNING *`,
-      [start_date, due_date, rental_fee, fee_frequency, security_bond, accessories_included, notes, req.params.id]
+        final_fee = COALESCE($5, final_fee),
+        security_bond = COALESCE($6, security_bond),
+        accessories_included = COALESCE($7, accessories_included),
+        notes = COALESCE($8, notes)
+      WHERE id = $9 RETURNING *`,
+      [start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes, req.params.id]
     );
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });
@@ -254,6 +256,24 @@ router.post('/:id/photos', upload.single('photo'), async (req, res) => {
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ success: false, message: 'Failed to upload photo', error: error.message });
+  }
+});
+
+// Delete a single condition photo
+router.delete('/:id/photos/:photoId', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `DELETE FROM rental_photos WHERE id = $1 AND rental_id = $2 RETURNING file_path`,
+      [req.params.photoId, req.params.id]
+    );
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Photo not found' });
+    }
+    fs.unlink(path.join(process.cwd(), rows[0].file_path.replace(/^\//, '')), () => {});
+    res.json({ success: true, message: 'Photo deleted' });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete photo', error: error.message });
   }
 });
 

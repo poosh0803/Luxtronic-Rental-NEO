@@ -58,6 +58,7 @@ async function load() {
     document.getElementById('termsInfo').innerHTML = `
       <div><strong>Period:</strong> ${formatDate(rental.start_date)} to ${formatDate(rental.due_date)}</div>
       <div><strong>Fee:</strong> ${rental.rental_fee ? '$' + Number(rental.rental_fee).toFixed(2) + ' per ' + rental.fee_frequency : '-'}</div>
+      <div><strong>Final Rental Fee:</strong> ${rental.final_fee ? '$' + Number(rental.final_fee).toFixed(2) : '-'}</div>
       <div><strong>Security Bond:</strong> ${rental.security_bond ? '$' + Number(rental.security_bond).toFixed(2) : '-'}</div>
       <div><strong>Accessories:</strong> ${escapeHtml(rental.accessories_included) || '-'}</div>
       <div><strong>Notes:</strong> ${escapeHtml(rental.notes) || '-'}</div>
@@ -67,7 +68,14 @@ async function load() {
     const checkoutPhotos = photos.filter((p) => p.stage === 'checkout');
     const returnPhotos = photos.filter((p) => p.stage === 'return');
     document.getElementById('checkoutPhotos').innerHTML =
-      checkoutPhotos.map((p) => `<img src="${p.file_path}" alt="Checkout photo">`).join('') || '<div class="empty">None</div>';
+      checkoutPhotos
+        .map(
+          (p) => `<div class="photo-item">
+            <img src="${p.file_path}" alt="Checkout photo">
+            <button type="button" class="photo-delete-btn" title="Delete photo" onclick="deleteCheckoutPhoto(${p.id})">&times;</button>
+          </div>`
+        )
+        .join('') || '<div class="empty">None</div>';
     document.getElementById('returnPhotos').innerHTML =
       returnPhotos.map((p) => `<img src="${p.file_path}" alt="Return photo">`).join('') || '<div class="empty">None</div>';
 
@@ -79,8 +87,43 @@ async function load() {
   }
 }
 
+window.deleteCheckoutPhoto = async function (photoId) {
+  if (!confirm('Delete this checkout photo?')) return;
+  const errorEl = document.getElementById('checkoutPhotoError');
+  errorEl.innerHTML = '';
+  try {
+    await fetchJSON(`/api/rentals/${getRentalId()}/photos/${photoId}`, { method: 'DELETE' });
+    load();
+  } catch (err) {
+    errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   load();
+
+  document.getElementById('addCheckoutPhotoBtn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('checkoutPhotoError');
+    errorEl.innerHTML = '';
+    const input = document.getElementById('addCheckoutPhotoInput');
+    const files = input.files;
+    if (!files || files.length === 0) {
+      errorEl.innerHTML = `<div class="alert alert-danger">Choose one or more photos first.</div>`;
+      return;
+    }
+    try {
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('photo', file);
+        fd.append('stage', 'checkout');
+        await fetch(`/api/rentals/${getRentalId()}/photos`, { method: 'POST', body: fd });
+      }
+      input.value = '';
+      load();
+    } catch (err) {
+      errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+  });
 
   document.getElementById('markReturnedBtn').addEventListener('click', async () => {
     const id = getRentalId();
@@ -107,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editDueDate').value = toDateInputValue(currentRental.due_date);
     document.getElementById('editRentalFee').value = currentRental.rental_fee || '';
     document.getElementById('editFeeFrequency').value = currentRental.fee_frequency || 'day';
+    document.getElementById('editFinalFee').value = currentRental.final_fee || '';
     document.getElementById('editSecurityBond').value = currentRental.security_bond || '';
     document.getElementById('editAccessoriesIncluded').value = currentRental.accessories_included || '';
     document.getElementById('editNotes').value = currentRental.notes || '';
@@ -130,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
           due_date: document.getElementById('editDueDate').value,
           rental_fee: document.getElementById('editRentalFee').value || null,
           fee_frequency: document.getElementById('editFeeFrequency').value,
+          final_fee: document.getElementById('editFinalFee').value || null,
           security_bond: document.getElementById('editSecurityBond').value || null,
           accessories_included: document.getElementById('editAccessoriesIncluded').value,
           notes: document.getElementById('editNotes').value,

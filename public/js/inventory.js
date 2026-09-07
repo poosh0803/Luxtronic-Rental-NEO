@@ -30,14 +30,42 @@ function renderSpecsList(specs) {
 
 let unitsCache = [];
 let currentTypeFilter = 'all';
+let currentSearchQuery = '';
+let currentSort = 'label_asc';
+
+const STATUS_SORT_ORDER = { overdue: 0, in_repair: 1, rented: 2, available: 3, retired: 4 };
+
+function sortUnits(units) {
+  const sorted = units.slice();
+  switch (currentSort) {
+    case 'label_desc':
+      return sorted.sort((a, b) => b.label.localeCompare(a.label));
+    case 'value_desc':
+      return sorted.sort((a, b) => (b.estimate_value || 0) - (a.estimate_value || 0));
+    case 'value_asc':
+      return sorted.sort((a, b) => (a.estimate_value || 0) - (b.estimate_value || 0));
+    case 'status':
+      return sorted.sort((a, b) => STATUS_SORT_ORDER[a.status] - STATUS_SORT_ORDER[b.status]);
+    case 'label_asc':
+    default:
+      return sorted.sort((a, b) => a.label.localeCompare(b.label));
+  }
+}
 
 function renderUnits() {
   const body = document.getElementById('unitsBody');
-  const units = currentTypeFilter === 'all' ? unitsCache : unitsCache.filter((u) => u.type === currentTypeFilter);
+  let units = currentTypeFilter === 'all' ? unitsCache : unitsCache.filter((u) => u.type === currentTypeFilter);
+  if (currentSearchQuery) {
+    const q = currentSearchQuery.toLowerCase();
+    units = units.filter(
+      (u) => u.label.toLowerCase().includes(q) || (u.serial_number || '').toLowerCase().includes(q)
+    );
+  }
+  units = sortUnits(units);
 
   if (units.length === 0) {
     body.innerHTML = `<tr><td colspan="8"><div class="empty">${
-      unitsCache.length === 0 ? 'No units yet. Add one above.' : 'No units of this type.'
+      unitsCache.length === 0 ? 'No units yet. Add one above.' : 'No units match.'
     }</div></td></tr>`;
     return;
   }
@@ -109,6 +137,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#typeFilters .tab-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentTypeFilter = btn.dataset.type;
+    renderUnits();
+  });
+
+  document.getElementById('unitSearchInput').addEventListener('input', (e) => {
+    currentSearchQuery = e.target.value;
+    renderUnits();
+  });
+
+  document.getElementById('unitSortSelect').addEventListener('change', (e) => {
+    currentSort = e.target.value;
     renderUnits();
   });
 

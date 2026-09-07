@@ -30,14 +30,22 @@
 
   <div class="grid-2">
     <div class="panel" style="grid-column: 1 / -1;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
         <h2 style="margin:0;">Units</h2>
         <div class="tab-filters" id="typeFilters">
           <button type="button" class="tab-btn active" data-type="all">All</button>
           <button type="button" class="tab-btn" data-type="desktop">Desktop</button>
           <button type="button" class="tab-btn" data-type="laptop">Laptop</button>
         </div>
-        <button class="btn btn-primary" id="addUnitBtn">+ Add Unit</button>
+        <input type="text" id="unitSearchInput" placeholder="Search label or serial..." style="max-width:220px;">
+        <select id="unitSortSelect" style="max-width:190px;">
+          <option value="label_asc">Sort: Label (A-Z)</option>
+          <option value="label_desc">Sort: Label (Z-A)</option>
+          <option value="value_desc">Sort: Value (High-Low)</option>
+          <option value="value_asc">Sort: Value (Low-High)</option>
+          <option value="status">Sort: Status</option>
+        </select>
+        <button class="btn btn-primary" id="addUnitBtn" style="margin-left:auto;">+ Add Unit</button>
       </div>
       <div id="unitsError"></div>
       <table>

@@ -1,26 +1,53 @@
 let selectedCustomerId = null;
+let selectedUnitId = null;
+let availableUnitsCache = [];
 let searchTimer = null;
+let unitSearchTimer = null;
 
 async function loadAvailableUnits() {
-  const select = document.getElementById('unitSelect');
   const note = document.getElementById('unitNote');
   try {
     const { units } = await fetchJSON('/api/units?status=available');
+    availableUnitsCache = units;
     if (units.length === 0) {
       note.style.display = 'block';
-      select.innerHTML = '';
-      select.disabled = true;
-      return;
+      document.getElementById('unitSearch').disabled = true;
     }
-    select.innerHTML = units
-      .map((u) => `<option value="${u.id}">${escapeHtml(u.label)} (${u.type === 'laptop' ? 'Laptop' : 'Desktop'})</option>`)
-      .join('');
   } catch (err) {
     note.style.display = 'block';
     note.className = 'alert alert-danger';
     note.textContent = err.message;
   }
 }
+
+function searchUnits(q) {
+  const results = document.getElementById('unitResults');
+  if (!q) {
+    results.innerHTML = '';
+    return;
+  }
+  const query = q.toLowerCase();
+  const matches = availableUnitsCache.filter(
+    (u) => u.label.toLowerCase().includes(query) || (u.serial_number || '').toLowerCase().includes(query)
+  );
+  results.innerHTML =
+    matches
+      .map(
+        (u) => `<div class="btn btn-sm" style="display:block; margin-bottom:6px; text-align:left;" onclick="selectUnit(${u.id}, '${escapeHtml(u.label).replace(/'/g, "\\'")}', '${u.type}')">
+          ${escapeHtml(u.label)} (${u.type === 'laptop' ? 'Laptop' : 'Desktop'})${u.serial_number ? ' — ' + escapeHtml(u.serial_number) : ''}
+        </div>`
+      )
+      .join('') || '<div class="empty">No matches</div>';
+}
+
+window.selectUnit = function (id, label, type) {
+  selectedUnitId = id;
+  const box = document.getElementById('selectedUnit');
+  box.style.display = 'block';
+  box.textContent = `Selected: ${label} (${type === 'laptop' ? 'Laptop' : 'Desktop'})`;
+  document.getElementById('unitResults').innerHTML = '';
+  document.getElementById('unitSearch').value = '';
+};
 
 async function searchCustomers(q) {
   const results = document.getElementById('customerResults');
@@ -72,17 +99,29 @@ document.addEventListener('DOMContentLoaded', () => {
     searchTimer = setTimeout(() => searchCustomers(value), 250);
   });
 
+  document.getElementById('unitSearch').addEventListener('input', (e) => {
+    clearTimeout(unitSearchTimer);
+    const value = e.target.value;
+    unitSearchTimer = setTimeout(() => searchUnits(value), 150);
+  });
+
   document.getElementById('rentalForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const errorEl = document.getElementById('formError');
     errorEl.innerHTML = '';
 
+    if (!selectedUnitId) {
+      errorEl.innerHTML = `<div class="alert alert-danger">Please search and select an available unit.</div>`;
+      return;
+    }
+
     const payload = {
-      unit_id: document.getElementById('unitSelect').value,
+      unit_id: selectedUnitId,
       start_date: document.getElementById('startDate').value,
       due_date: document.getElementById('dueDate').value,
       rental_fee: document.getElementById('rentalFee').value || null,
       fee_frequency: document.getElementById('feeFrequency').value,
+      final_fee: document.getElementById('finalFee').value || null,
       security_bond: document.getElementById('securityBond').value || null,
       accessories_included: document.getElementById('accessoriesIncluded').value,
       notes: document.getElementById('notes').value,

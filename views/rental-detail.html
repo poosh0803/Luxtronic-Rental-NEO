@@ -78,6 +78,8 @@
           </select>
         </div>
       </div>
+      <label for="editFinalFee">Final Rental Fee ($)</label>
+      <input type="number" step="0.01" id="editFinalFee" placeholder="Leave blank unless giving a discount off the rate above">
       <label for="editSecurityBond">Security Bond ($)</label>
       <input type="number" step="0.01" id="editSecurityBond">
       <label for="editAccessoriesIncluded">Accessories Included</label>
@@ -97,6 +99,11 @@
     <h2>Condition Photos</h2>
     <h2 style="font-size:14px; color:var(--muted);">Checkout</h2>
     <div class="photo-grid" id="checkoutPhotos"></div>
+    <div class="actions-bar" style="margin-top:10px;">
+      <input type="file" id="addCheckoutPhotoInput" accept="image/*" multiple style="max-width:260px;">
+      <button class="btn btn-sm" id="addCheckoutPhotoBtn">Add Photo(s)</button>
+    </div>
+    <div id="checkoutPhotoError"></div>
     <h2 style="font-size:14px; color:var(--muted); margin-top:16px;">Return</h2>
     <div class="photo-grid" id="returnPhotos"></div>
   </div>

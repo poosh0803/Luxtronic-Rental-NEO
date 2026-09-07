@@ -57,11 +57,11 @@
   </div>
 
   <h3 class="section-title">1. Rental Period</h3>
-  <p>From <span class="fill" id="periodFrom"></span> to <span class="fill" id="periodTo"></span></p>
-  <p>The rental period shall commence on the period shown above. The rental may be extended upon mutual agreement in writing. Please note the late return penalty $20 AUD per calendar day will apply if the rental device does not return on time.</p>
+  <p class="period-highlight">From <span class="fill" id="periodFrom"></span> to <span class="fill" id="periodTo"></span></p>
+  <p class="period-warning">The rental period shall commence on the period shown above. The rental may be extended upon mutual agreement in writing. Please note the late return penalty $20 AUD per calendar day will apply if the rental device does not return on time.</p>
 
   <h3 class="section-title">2. Rental Payment</h3>
-  <p>The Lessee agrees to pay the Lessor a rental fee of <span class="fill" id="rentalFeeText"></span>.</p>
+  <p>The Lessee agrees to pay the Lessor a rental fee of <span class="fill" id="rentalFeeText"></span><span id="finalFeeLine"></span>.</p>
   <p>Payment Due Date: Payment is due when rental started.</p>
   <p>Payment Method: Payment shall be made via cash, credit card or bank transfer.</p>
 
@@ -170,14 +170,16 @@
   <div class="signature-block">
     <div class="party">
       <div>Lessor: Luxtronic Pty Ltd (ABN <span id="lessorAbn2"></span>)</div>
-      <div class="field-line">Sign: ___________________________</div>
+      <div class="field-line">Sign:</div>
+      <div class="signature-box"></div>
       <div class="field-line">Date: ___________________________</div>
     </div>
     <div class="party">
       <div>Lessee</div>
       <div class="field-line">Printed name: <span class="fill" id="lesseeNameSign"></span></div>
-      <div class="field-line">Sign: ___________________________</div>
-      <div class="field-line">Date of pick up: ___________________________</div>
+      <div class="field-line">Sign:</div>
+      <div class="signature-box"></div>
+      <div class="field-line">Time of pick up: ___________________________</div>
     </div>
   </div>
 
