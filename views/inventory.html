@@ -30,8 +30,13 @@
 
   <div class="grid-2">
     <div class="panel" style="grid-column: 1 / -1;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:12px;">
         <h2 style="margin:0;">Units</h2>
+        <div class="tab-filters" id="typeFilters">
+          <button type="button" class="tab-btn active" data-type="all">All</button>
+          <button type="button" class="tab-btn" data-type="desktop">Desktop</button>
+          <button type="button" class="tab-btn" data-type="laptop">Laptop</button>
+        </div>
         <button class="btn btn-primary" id="addUnitBtn">+ Add Unit</button>
       </div>
       <div id="unitsError"></div>
@@ -85,6 +90,7 @@
       <div class="actions-bar">
         <button type="submit" class="btn btn-primary">Save Unit</button>
         <button type="button" class="btn" id="cancelUnitForm">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteUnitBtn" style="display:none; margin-left:auto;">Delete</button>
       </div>
       <div id="unitFormError"></div>
     </form>

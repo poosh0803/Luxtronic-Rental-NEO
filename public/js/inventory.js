@@ -29,34 +29,43 @@ function renderSpecsList(specs) {
 }
 
 let unitsCache = [];
+let currentTypeFilter = 'all';
+
+function renderUnits() {
+  const body = document.getElementById('unitsBody');
+  const units = currentTypeFilter === 'all' ? unitsCache : unitsCache.filter((u) => u.type === currentTypeFilter);
+
+  if (units.length === 0) {
+    body.innerHTML = `<tr><td colspan="8"><div class="empty">${
+      unitsCache.length === 0 ? 'No units yet. Add one above.' : 'No units of this type.'
+    }</div></td></tr>`;
+    return;
+  }
+  body.innerHTML = units
+    .map(
+      (u) => `<tr>
+        <td><a href="/unit-detail?id=${u.id}">${escapeHtml(u.label)}</a></td>
+        <td>${u.type === 'laptop' ? 'Laptop' : 'Desktop'}</td>
+        <td>${renderSpecsList(u.specs)}</td>
+        <td>${escapeHtml(u.serial_number) || '-'}</td>
+        <td>${u.estimate_value ? '$' + Number(u.estimate_value).toFixed(2) : '-'}</td>
+        <td>${statusBadge(u.status)}</td>
+        <td>${u.open_customer_name ? escapeHtml(u.open_customer_name) + ' (due ' + formatDate(u.open_due_date) + ')' : '-'}</td>
+        <td>
+          <a class="btn btn-sm btn-fixed" href="/unit-detail?id=${u.id}">History</a>
+          <button class="btn btn-sm btn-fixed" onclick="editUnit(${u.id})">Edit</button>
+        </td>
+      </tr>`
+    )
+    .join('');
+}
 
 async function loadUnits() {
-  const body = document.getElementById('unitsBody');
   const errorEl = document.getElementById('unitsError');
   try {
     const { units } = await fetchJSON('/api/units');
     unitsCache = units;
-    if (units.length === 0) {
-      body.innerHTML = `<tr><td colspan="8"><div class="empty">No units yet. Add one above.</div></td></tr>`;
-      return;
-    }
-    body.innerHTML = units
-      .map(
-        (u) => `<tr>
-          <td><a href="/unit-detail?id=${u.id}">${escapeHtml(u.label)}</a></td>
-          <td>${u.type === 'laptop' ? 'Laptop' : 'Desktop'}</td>
-          <td>${renderSpecsList(u.specs)}</td>
-          <td>${escapeHtml(u.serial_number) || '-'}</td>
-          <td>${u.estimate_value ? '$' + Number(u.estimate_value).toFixed(2) : '-'}</td>
-          <td>${statusBadge(u.status)}</td>
-          <td>${u.open_customer_name ? escapeHtml(u.open_customer_name) + ' (due ' + formatDate(u.open_due_date) + ')' : '-'}</td>
-          <td>
-            <a class="btn btn-sm btn-fixed" href="/unit-detail?id=${u.id}">History</a>
-            <button class="btn btn-sm btn-fixed" onclick="editUnit(${u.id})">Edit</button>
-          </td>
-        </tr>`
-      )
-      .join('');
+    renderUnits();
   } catch (err) {
     errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
   }
@@ -72,6 +81,7 @@ function resetUnitForm() {
   document.getElementById('unitId').value = '';
   document.getElementById('unitFormTitle').textContent = 'Add Unit';
   document.getElementById('unitFormError').innerHTML = '';
+  document.getElementById('deleteUnitBtn').style.display = 'none';
 }
 
 window.editUnit = function (id) {
@@ -86,11 +96,21 @@ window.editUnit = function (id) {
   document.getElementById('unitSpecs').value = specsToText(unit.specs);
   document.getElementById('unitManualStatus').value = unit.manual_status || 'none';
   document.getElementById('unitFormTitle').textContent = `Edit ${unit.label}`;
+  document.getElementById('deleteUnitBtn').style.display = 'inline-block';
   showUnitForm();
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   loadUnits();
+
+  document.getElementById('typeFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    document.querySelectorAll('#typeFilters .tab-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTypeFilter = btn.dataset.type;
+    renderUnits();
+  });
 
   document.getElementById('addUnitBtn').addEventListener('click', () => {
     resetUnitForm();
@@ -132,6 +152,25 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify(payload),
         });
       }
+      document.getElementById('unitFormPanel').style.display = 'none';
+      resetUnitForm();
+      loadUnits();
+    } catch (err) {
+      errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+  });
+
+  document.getElementById('deleteUnitBtn').addEventListener('click', async () => {
+    const id = document.getElementById('unitId').value;
+    if (!id) return;
+    const unit = unitsCache.find((u) => u.id === Number(id));
+    const label = unit ? unit.label : 'this unit';
+    if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+
+    const errorEl = document.getElementById('unitFormError');
+    errorEl.innerHTML = '';
+    try {
+      await fetchJSON(`/api/units/${id}`, { method: 'DELETE' });
       document.getElementById('unitFormPanel').style.display = 'none';
       resetUnitForm();
       loadUnits();

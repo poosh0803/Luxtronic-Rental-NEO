@@ -86,4 +86,26 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Delete a unit - blocked if it has any rental history, so real
+// business records can't be silently orphaned/lost via the inventory page.
+router.delete('/:id', async (req, res) => {
+  try {
+    const { rows: existingRentals } = await pool.query(`SELECT 1 FROM rentals WHERE unit_id = $1 LIMIT 1`, [req.params.id]);
+    if (existingRentals.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Cannot delete a unit with rental history. Delete its rentals first if you really need to remove it.',
+      });
+    }
+    const { rowCount } = await pool.query(`DELETE FROM units WHERE id = $1`, [req.params.id]);
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: 'Unit not found' });
+    }
+    res.json({ success: true, message: 'Unit deleted' });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete unit', error: error.message });
+  }
+});
+
 export default router;
