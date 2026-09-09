@@ -46,6 +46,11 @@ CREATE TABLE rentals (
   -- Reset to NULL whenever due_date changes, so a new due date can trigger
   -- its own notification later if it too passes unreturned.
   late_notified_at TIMESTAMPTZ,
+  -- The portal's own id for that notification, so it can be deleted there
+  -- (via the portal's DELETE /api/notifications/:id) once this rental is
+  -- returned or removed - otherwise a stale "overdue" alert lingers on the
+  -- portal forever, since the portal has no idea the rental changed.
+  portal_notification_id VARCHAR(100),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

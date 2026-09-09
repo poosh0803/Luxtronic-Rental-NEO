@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import pool from '../db.js';
+import { clearPortalNotification } from '../lateNotifier.js';
 
 const router = express.Router();
 
@@ -218,6 +219,9 @@ router.put('/:id/return', async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found or already returned' });
     }
+    // The "overdue" alert is stale now that it's back - clear it from the
+    // portal too, rather than leaving it to linger there forever.
+    clearPortalNotification(rows[0].portal_notification_id);
     res.json({ success: true, message: 'Rental marked returned', rental: rows[0] });
   } catch (error) {
     console.error('Database error:', error);
@@ -230,13 +234,16 @@ router.put('/:id/return', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { rows: photos } = await pool.query(`SELECT file_path FROM rental_photos WHERE rental_id = $1`, [req.params.id]);
-    const { rowCount } = await pool.query(`DELETE FROM rentals WHERE id = $1`, [req.params.id]);
-    if (rowCount === 0) {
+    const { rows } = await pool.query(`DELETE FROM rentals WHERE id = $1 RETURNING portal_notification_id`, [req.params.id]);
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
     photos.forEach((p) => {
       fs.unlink(path.join(process.cwd(), p.file_path.replace(/^\//, '')), () => {});
     });
+    // A deleted rental can't be looked up on the portal's "Open" link anymore
+    // either way - clear its notification rather than leaving a dead link.
+    clearPortalNotification(rows[0].portal_notification_id);
     res.json({ success: true, message: 'Rental deleted' });
   } catch (error) {
     console.error('Database error:', error);
