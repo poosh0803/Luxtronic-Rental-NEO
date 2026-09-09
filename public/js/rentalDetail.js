@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('markReturnedBtn').addEventListener('click', async () => {
+    if (!confirm('Mark this unit as returned?')) return;
     const id = getRentalId();
     const errorEl = document.getElementById('returnError');
     errorEl.innerHTML = '';
