@@ -190,7 +190,11 @@ router.put('/:id', async (req, res) => {
         final_fee = COALESCE($5, final_fee),
         security_bond = COALESCE($6, security_bond),
         accessories_included = COALESCE($7, accessories_included),
-        notes = COALESCE($8, notes)
+        notes = COALESCE($8, notes),
+        -- Changing the due date means a rental that was already flagged
+        -- overdue-and-notified should be eligible to notify again if the
+        -- new date also passes unreturned.
+        late_notified_at = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE late_notified_at END
       WHERE id = $9 RETURNING *`,
       [start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes, req.params.id]
     );

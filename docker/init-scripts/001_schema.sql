@@ -41,6 +41,11 @@ CREATE TABLE rentals (
   security_bond NUMERIC(10, 2),
   accessories_included TEXT,
   notes TEXT,
+  -- Set once an overdue notification has been pushed to the portal for
+  -- this rental, so the background check doesn't re-notify every cycle.
+  -- Reset to NULL whenever due_date changes, so a new due date can trigger
+  -- its own notification later if it too passes unreturned.
+  late_notified_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
