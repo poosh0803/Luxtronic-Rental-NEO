@@ -106,6 +106,7 @@ Luxtronic-Rental-NEO/
 * One-click print of a pre-filled Rental Agreement matching Luxtronic's contract, with page numbers, ready for the customer to sign on paper
 * Light/dark theme toggle, matching the styling used across Luxtronic's other in-house tools
 * Overdue rentals automatically push a one-time notification to the Luxtronic Portal's bell icon (see `src/lateNotifier.js`) — checked every 30 minutes, no polling/setup needed on this app's side
+* Analysis page: fleet utilization, estimated revenue, unit status breakdown, on-time vs late returns, monthly rental volume, most-rented units and top customers
 
 ## Deployment
 

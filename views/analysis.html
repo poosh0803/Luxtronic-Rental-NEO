@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unit Detail - Luxtronic Rental</title>
+<title>Analysis - Luxtronic Rental</title>
 <link rel="icon" type="image/png" href="/images/logo.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
@@ -26,29 +26,54 @@
   <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
 </nav>
 <main>
-  <h1 id="pageTitle">Unit</h1>
-  <p class="subtitle" id="pageSubtitle"></p>
+  <h1>Analysis</h1>
+  <p class="subtitle">Stats across every rental ever recorded.</p>
   <div id="loadError"></div>
 
-  <div class="panel">
-    <h2>Details</h2>
-    <div id="unitInfo"></div>
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Unit Status Right Now</h2>
+      <div id="statusBars"></div>
+    </div>
+    <div class="panel">
+      <h2>Rentals by Equipment Type</h2>
+      <div id="typeBars"></div>
+    </div>
   </div>
 
   <div class="panel">
-    <h2>Rental History</h2>
-    <table>
-      <thead><tr><th>Customer</th><th>Start</th><th>Due</th><th>Returned</th><th>Fee</th><th>Bond</th></tr></thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-    <div id="historyEmpty" class="empty" style="display:none;">This unit hasn't been rented out yet.</div>
+    <h2>On-Time vs Late Returns</h2>
+    <div id="returnBars"></div>
+    <div id="returnEmpty" class="empty" style="display:none;">No rentals returned yet.</div>
   </div>
 
-  <div class="actions-bar">
-    <a class="btn" href="/inventory">&larr; Back to Inventory</a>
+  <div class="panel">
+    <h2>Rentals Started, Last 6 Months</h2>
+    <div id="monthlyBars"></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Most-Rented Units</h2>
+      <table>
+        <thead><tr><th>Unit</th><th>Type</th><th>Rentals</th><th>Est. Revenue</th></tr></thead>
+        <tbody id="topUnitsBody"></tbody>
+      </table>
+      <div id="topUnitsEmpty" class="empty" style="display:none;">No rentals yet.</div>
+    </div>
+    <div class="panel">
+      <h2>Top Customers</h2>
+      <table>
+        <thead><tr><th>Customer</th><th>Rentals</th><th>Late Returns</th></tr></thead>
+        <tbody id="topCustomersBody"></tbody>
+      </table>
+      <div id="topCustomersEmpty" class="empty" style="display:none;">No rentals yet.</div>
+    </div>
   </div>
 </main>
 <script src="/js/common.js"></script>
-<script src="/js/unitDetail.js"></script>
+<script src="/js/analysis.js"></script>
 </body>
 </html>
