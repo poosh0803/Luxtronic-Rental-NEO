@@ -2,6 +2,11 @@ function money(n) {
   return '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
+function days(n) {
+  if (n === null || n === undefined) return '—';
+  return `${n.toFixed(1)} day${Math.abs(n - 1) < 0.05 ? '' : 's'}`;
+}
+
 function statCard(label, value, colorClass, sub) {
   return `<div class="stat-card">
     <div class="stat-label">${escapeHtml(label)}</div>
@@ -27,18 +32,30 @@ const STATUS_COLORS = {
   retired: '#607d8b',
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
+const RANGE_LABELS = {
+  all: 'Stats across every rental ever recorded.',
+  this_month: "Stats for rentals started this month.",
+  last_month: "Stats for rentals started last month.",
+};
+
+let currentRange = 'all';
+
+async function loadAnalysis() {
   try {
-    const data = await fetchJSON('/api/analytics/rentals');
-    const { overview, byType, statusCounts, topUnits, topCustomers, monthly } = data;
+    const data = await fetchJSON(`/api/analytics/rentals?range=${currentRange}`);
+    const { overview, byType, statusCounts, topUnits, topCustomers, idleUnits, monthly } = data;
+
+    document.getElementById('rangeSubtitle').textContent = RANGE_LABELS[currentRange];
 
     document.getElementById('statsGrid').innerHTML = [
       statCard('Total Rentals', overview.totalRentals, 'orange'),
-      statCard('Currently Rented Out', overview.activeCount, 'blue'),
-      statCard('Currently Overdue', overview.overdueCount, overview.overdueCount > 0 ? 'red' : 'green'),
+      statCard('Currently Rented Out', overview.activeCount, 'blue', 'Not scoped to the range above'),
+      statCard('Currently Overdue', overview.overdueCount, overview.overdueCount > 0 ? 'red' : 'green', 'Not scoped to the range above'),
       statCard('Fleet Utilization', Math.round(overview.fleetUtilization * 100) + '%', 'orange', `${overview.totalUnits} unit${overview.totalUnits === 1 ? '' : 's'} total`),
       statCard('Est. Total Revenue', money(overview.totalRevenue), 'green', 'From recorded fees, not a payment ledger'),
-      statCard('Bonds Currently Held', money(overview.bondsHeld), 'blue', 'Across active rentals'),
+      statCard('Bonds Currently Held', money(overview.bondsHeld), 'blue', 'Not scoped to the range above'),
+      statCard('Avg. Rental Duration', days(overview.avgDurationDays), 'orange', 'Completed rentals only'),
+      statCard('Avg. Days Late', days(overview.avgDaysLate), overview.avgDaysLate ? 'red' : 'green', 'Among late returns only'),
     ].join('');
 
     const statusOrder = ['available', 'rented', 'overdue', 'in_repair', 'retired'];
@@ -55,7 +72,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const returnedTotal = overview.returnedOnTimeCount + overview.returnedLateCount;
     if (returnedTotal === 0) {
       document.getElementById('returnEmpty').style.display = 'block';
+      document.getElementById('returnBars').innerHTML = '';
     } else {
+      document.getElementById('returnEmpty').style.display = 'none';
       const maxReturn = Math.max(1, overview.returnedOnTimeCount, overview.returnedLateCount);
       document.getElementById('returnBars').innerHTML =
         barRow('On Time', overview.returnedOnTimeCount, maxReturn, '#388e3c') +
@@ -65,10 +84,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const maxMonth = Math.max(1, ...monthly.map((m) => m.count));
     document.getElementById('monthlyBars').innerHTML = monthly.map((m) => barRow(m.month, m.count, maxMonth, '#dda84b')).join('');
 
+    const maxMonthRevenue = Math.max(1, ...monthly.map((m) => m.revenue));
+    document.getElementById('monthlyRevenueBars').innerHTML = monthly
+      .map((m) => barRow(m.month, m.revenue, maxMonthRevenue, '#388e3c', money(m.revenue)))
+      .join('');
+
+    const idleBody = document.getElementById('idleUnitsBody');
+    if (idleUnits.length === 0) {
+      document.getElementById('idleUnitsEmpty').style.display = 'block';
+    } else {
+      document.getElementById('idleUnitsEmpty').style.display = 'none';
+      idleBody.innerHTML = idleUnits
+        .map(
+          (u) => `<tr>
+            <td>${escapeHtml(u.label)}</td>
+            <td>${u.type === 'laptop' ? 'Laptop' : 'Desktop'}</td>
+            <td>${statusBadge(u.status)}</td>
+          </tr>`
+        )
+        .join('');
+    }
+
     const topUnitsBody = document.getElementById('topUnitsBody');
     if (topUnits.length === 0) {
       document.getElementById('topUnitsEmpty').style.display = 'block';
+      topUnitsBody.innerHTML = '';
     } else {
+      document.getElementById('topUnitsEmpty').style.display = 'none';
       topUnitsBody.innerHTML = topUnits
         .map(
           (u) => `<tr>
@@ -84,7 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const topCustomersBody = document.getElementById('topCustomersBody');
     if (topCustomers.length === 0) {
       document.getElementById('topCustomersEmpty').style.display = 'block';
+      topCustomersBody.innerHTML = '';
     } else {
+      document.getElementById('topCustomersEmpty').style.display = 'none';
       topCustomersBody.innerHTML = topCustomers
         .map(
           (c) => `<tr>
@@ -98,4 +142,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     document.getElementById('loadError').innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
   }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAnalysis();
+
+  document.getElementById('rangeFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    document.querySelectorAll('#rangeFilters .tab-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentRange = btn.dataset.range;
+    loadAnalysis();
+  });
 });

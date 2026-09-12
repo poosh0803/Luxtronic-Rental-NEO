@@ -26,9 +26,18 @@
   <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
 </nav>
 <main>
-  <h1>Analysis</h1>
-  <p class="subtitle">Stats across every rental ever recorded.</p>
-  <div id="loadError"></div>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <h1 style="margin-bottom:2px;">Analysis</h1>
+      <p class="subtitle" id="rangeSubtitle" style="margin-bottom:0;">Stats across every rental ever recorded.</p>
+    </div>
+    <div class="tab-filters" id="rangeFilters">
+      <button type="button" class="tab-btn active" data-range="all">All Time</button>
+      <button type="button" class="tab-btn" data-range="this_month">This Month</button>
+      <button type="button" class="tab-btn" data-range="last_month">Last Month</button>
+    </div>
+  </div>
+  <div id="loadError" style="margin-top:16px;"></div>
 
   <div class="stats-grid" id="statsGrid"></div>
 
@@ -49,9 +58,24 @@
     <div id="returnEmpty" class="empty" style="display:none;">No rentals returned yet.</div>
   </div>
 
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Rentals Started, Last 6 Months</h2>
+      <div id="monthlyBars"></div>
+    </div>
+    <div class="panel">
+      <h2>Est. Revenue, Last 6 Months</h2>
+      <div id="monthlyRevenueBars"></div>
+    </div>
+  </div>
+
   <div class="panel">
-    <h2>Rentals Started, Last 6 Months</h2>
-    <div id="monthlyBars"></div>
+    <h2>Idle Inventory <span style="font-weight:normal; color:var(--muted); font-size:13px;">— units never rented out</span></h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Type</th><th>Status</th></tr></thead>
+      <tbody id="idleUnitsBody"></tbody>
+    </table>
+    <div id="idleUnitsEmpty" class="empty" style="display:none;">Every unit has been rented at least once.</div>
   </div>
 
   <div class="grid-2">
