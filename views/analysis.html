@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analysis - Luxtronic Rental</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="logo-container">
+    <img src="/images/logo.png" alt="Luxtronic" class="logo-img">
+    <a href="/" class="brand-name">LUXTRONIC</a>
+    <span class="tagline">Rental Tracker</span>
+  </div>
+  <div class="dark-mode-toggle" id="darkModeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
+</header>
+<nav class="nav-bar">
+  <a href="/" class="nav-item"><i class="fas fa-gauge-high"></i><span class="nav-text">Dashboard</span></a>
+  <a href="/inventory" class="nav-item"><i class="fas fa-desktop"></i><span class="nav-text">Inventory</span></a>
+  <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
+  <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
+  <a href="/analysis" class="nav-item"><i class="fas fa-chart-column"></i><span class="nav-text">Analysis</span></a>
+  <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
+</nav>
+<main>
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <h1 style="margin-bottom:2px;">Analysis</h1>
+      <p class="subtitle" id="rangeSubtitle" style="margin-bottom:0;">Stats across every rental ever recorded.</p>
+    </div>
+    <div class="tab-filters" id="rangeFilters">
+      <button type="button" class="tab-btn active" data-range="all">All Time</button>
+      <button type="button" class="tab-btn" data-range="this_month">This Month</button>
+      <button type="button" class="tab-btn" data-range="last_month">Last Month</button>
+    </div>
+  </div>
+  <div id="loadError" style="margin-top:16px;"></div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Unit Status Right Now</h2>
+      <div id="statusBars"></div>
+    </div>
+    <div class="panel">
+      <h2>Rentals by Equipment Type</h2>
+      <div id="typeBars"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>On-Time vs Late Returns</h2>
+    <div id="returnBars"></div>
+    <div id="returnEmpty" class="empty" style="display:none;">No rentals returned yet.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Rentals Started, Last 6 Months</h2>
+      <div id="monthlyBars"></div>
+    </div>
+    <div class="panel">
+      <h2>Est. Revenue, Last 6 Months</h2>
+      <div id="monthlyRevenueBars"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Most-Rented Units</h2>
+      <table>
+        <thead><tr><th>Unit</th><th>Type</th><th>Rentals</th><th>Est. Revenue</th></tr></thead>
+        <tbody id="topUnitsBody"></tbody>
+      </table>
+      <div id="topUnitsEmpty" class="empty" style="display:none;">No rentals yet.</div>
+    </div>
+    <div class="panel">
+      <h2>Top Customers</h2>
+      <table>
+        <thead><tr><th>Customer</th><th>Rentals</th><th>Late Returns</th></tr></thead>
+        <tbody id="topCustomersBody"></tbody>
+      </table>
+      <div id="topCustomersEmpty" class="empty" style="display:none;">No rentals yet.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Idle Inventory <span style="font-weight:normal; color:var(--muted); font-size:13px;">— units never rented out</span></h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Type</th><th>Status</th></tr></thead>
+      <tbody id="idleUnitsBody"></tbody>
+    </table>
+    <div id="idleUnitsEmpty" class="empty" style="display:none;">Every unit has been rented at least once.</div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/analysis.js"></script>
+</body>
+</html>
