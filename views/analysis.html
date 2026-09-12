@@ -69,15 +69,6 @@
     </div>
   </div>
 
-  <div class="panel">
-    <h2>Idle Inventory <span style="font-weight:normal; color:var(--muted); font-size:13px;">— units never rented out</span></h2>
-    <table>
-      <thead><tr><th>Unit</th><th>Type</th><th>Status</th></tr></thead>
-      <tbody id="idleUnitsBody"></tbody>
-    </table>
-    <div id="idleUnitsEmpty" class="empty" style="display:none;">Every unit has been rented at least once.</div>
-  </div>
-
   <div class="grid-2">
     <div class="panel">
       <h2>Most-Rented Units</h2>
@@ -95,6 +86,15 @@
       </table>
       <div id="topCustomersEmpty" class="empty" style="display:none;">No rentals yet.</div>
     </div>
+  </div>
+
+  <div class="panel">
+    <h2>Idle Inventory <span style="font-weight:normal; color:var(--muted); font-size:13px;">— units never rented out</span></h2>
+    <table>
+      <thead><tr><th>Unit</th><th>Type</th><th>Status</th></tr></thead>
+      <tbody id="idleUnitsBody"></tbody>
+    </table>
+    <div id="idleUnitsEmpty" class="empty" style="display:none;">Every unit has been rented at least once.</div>
   </div>
 </main>
 <script src="/js/common.js"></script>
