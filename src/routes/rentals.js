@@ -116,6 +116,7 @@ router.post('/', async (req, res) => {
       fee_frequency,
       final_fee,
       security_bond,
+      security_bond_currency,
       accessories_included,
       notes,
     } = req.body;
@@ -161,9 +162,21 @@ router.post('/', async (req, res) => {
     }
 
     const rentalResult = await client.query(
-      `INSERT INTO rentals (unit_id, customer_id, start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
-      [unit_id, finalCustomerId, start_date, due_date, rental_fee || null, fee_frequency || null, final_fee || null, security_bond || null, accessories_included || null, notes || null]
+      `INSERT INTO rentals (unit_id, customer_id, start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, security_bond_currency, accessories_included, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+      [
+        unit_id,
+        finalCustomerId,
+        start_date,
+        due_date,
+        rental_fee || null,
+        fee_frequency || null,
+        final_fee || null,
+        security_bond || null,
+        security_bond_currency === 'RMB' ? 'RMB' : 'AUD',
+        accessories_included || null,
+        notes || null,
+      ]
     );
 
     await client.query('COMMIT');
@@ -181,7 +194,8 @@ router.post('/', async (req, res) => {
 // unit or customer, since reassigning those is really a different rental.
 router.put('/:id', async (req, res) => {
   try {
-    const { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes } = req.body;
+    const { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, security_bond_currency, accessories_included, notes } =
+      req.body;
     const { rows } = await pool.query(
       `UPDATE rentals SET
         start_date = COALESCE($1, start_date),
@@ -190,14 +204,26 @@ router.put('/:id', async (req, res) => {
         fee_frequency = COALESCE($4, fee_frequency),
         final_fee = COALESCE($5, final_fee),
         security_bond = COALESCE($6, security_bond),
-        accessories_included = COALESCE($7, accessories_included),
-        notes = COALESCE($8, notes),
+        security_bond_currency = COALESCE($7, security_bond_currency),
+        accessories_included = COALESCE($8, accessories_included),
+        notes = COALESCE($9, notes),
         -- Changing the due date means a rental that was already flagged
         -- overdue-and-notified should be eligible to notify again if the
         -- new date also passes unreturned.
         late_notified_at = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE late_notified_at END
-      WHERE id = $9 RETURNING *`,
-      [start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, accessories_included, notes, req.params.id]
+      WHERE id = $10 RETURNING *`,
+      [
+        start_date,
+        due_date,
+        rental_fee,
+        fee_frequency,
+        final_fee,
+        security_bond,
+        security_bond_currency === 'RMB' || security_bond_currency === 'AUD' ? security_bond_currency : null,
+        accessories_included,
+        notes,
+        req.params.id,
+      ]
     );
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });

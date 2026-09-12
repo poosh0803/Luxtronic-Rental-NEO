@@ -64,7 +64,10 @@ router.get('/rentals', async (req, res) => {
       SELECT
         COUNT(*) FILTER (WHERE returned_at IS NULL) AS active_count,
         COUNT(*) FILTER (WHERE returned_at IS NULL AND due_date < CURRENT_DATE) AS overdue_count,
-        COALESCE(SUM(security_bond) FILTER (WHERE returned_at IS NULL), 0) AS bonds_held
+        -- Bonds are never summed across currencies - AUD and RMB are kept
+        -- as separate totals throughout.
+        COALESCE(SUM(security_bond) FILTER (WHERE returned_at IS NULL AND security_bond_currency = 'AUD'), 0) AS bonds_held_aud,
+        COALESCE(SUM(security_bond) FILTER (WHERE returned_at IS NULL AND security_bond_currency = 'RMB'), 0) AS bonds_held_rmb
       FROM rentals
     `);
     const live = liveRows[0];
@@ -183,7 +186,8 @@ router.get('/rentals', async (req, res) => {
         overdueCount: Number(live.overdue_count),
         returnedLateCount,
         returnedOnTimeCount,
-        bondsHeld: Number(live.bonds_held),
+        bondsHeldAud: Number(live.bonds_held_aud),
+        bondsHeldRmb: Number(live.bonds_held_rmb),
         totalRevenue,
         totalUnits: units.length,
         fleetUtilization: units.length ? (statusCounts.rented + statusCounts.overdue) / units.length : 0,

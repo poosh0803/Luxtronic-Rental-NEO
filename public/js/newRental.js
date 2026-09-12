@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fee_frequency: document.getElementById('feeFrequency').value,
       final_fee: document.getElementById('finalFee').value || null,
       security_bond: document.getElementById('securityBond').value || null,
+      security_bond_currency: document.getElementById('securityBondCurrency').value,
       accessories_included: document.getElementById('accessoriesIncluded').value,
       notes: document.getElementById('notes').value,
     };

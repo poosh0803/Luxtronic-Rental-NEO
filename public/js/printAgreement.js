@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'rentalFeeText',
       rental.rental_fee ? `$${Number(rental.rental_fee).toFixed(2)} per ${rental.fee_frequency || 'day'}` : '_________ per [day / week / month]'
     );
-    setText('securityBondText', rental.security_bond ? Number(rental.security_bond).toFixed(2) : '____________');
+    setText('securityBondText', rental.security_bond ? formatMoney(rental.security_bond, rental.security_bond_currency) : '$____________');
     setText('finalFeeLine', rental.final_fee ? `, for an agreed total of $${Number(rental.final_fee).toFixed(2)}` : '');
   } catch (err) {
     status.textContent = `Error: ${err.message}`;

@@ -59,7 +59,7 @@ async function load() {
       <div><strong>Period:</strong> ${formatDate(rental.start_date)} to ${formatDate(rental.due_date)}</div>
       <div><strong>Fee:</strong> ${rental.rental_fee ? '$' + Number(rental.rental_fee).toFixed(2) + ' per ' + rental.fee_frequency : '-'}</div>
       <div><strong>Final Rental Fee:</strong> ${rental.final_fee ? '$' + Number(rental.final_fee).toFixed(2) : '-'}</div>
-      <div><strong>Security Bond:</strong> ${rental.security_bond ? '$' + Number(rental.security_bond).toFixed(2) : '-'}</div>
+      <div><strong>Security Bond:</strong> ${rental.security_bond ? formatMoney(rental.security_bond, rental.security_bond_currency) : '-'}</div>
       <div><strong>Accessories:</strong> ${escapeHtml(rental.accessories_included) || '-'}</div>
       <div><strong>Notes:</strong> ${escapeHtml(rental.notes) || '-'}</div>
       <div><strong>Returned:</strong> ${rental.returned_at ? formatDate(rental.returned_at) : 'Not yet returned'}</div>
@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editFeeFrequency').value = currentRental.fee_frequency || 'day';
     document.getElementById('editFinalFee').value = currentRental.final_fee || '';
     document.getElementById('editSecurityBond').value = currentRental.security_bond || '';
+    document.getElementById('editSecurityBondCurrency').value = currentRental.security_bond_currency || 'AUD';
     document.getElementById('editAccessoriesIncluded').value = currentRental.accessories_included || '';
     document.getElementById('editNotes').value = currentRental.notes || '';
     document.getElementById('rentalEditError').innerHTML = '';
@@ -177,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
           fee_frequency: document.getElementById('editFeeFrequency').value,
           final_fee: document.getElementById('editFinalFee').value || null,
           security_bond: document.getElementById('editSecurityBond').value || null,
+          security_bond_currency: document.getElementById('editSecurityBondCurrency').value,
           accessories_included: document.getElementById('editAccessoriesIncluded').value,
           notes: document.getElementById('editNotes').value,
         }),

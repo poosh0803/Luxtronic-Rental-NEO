@@ -29,6 +29,16 @@ function statusBadge(status) {
   return `<span class="badge badge-${status}">${label}</span>`;
 }
 
+const CURRENCY_SYMBOLS = { AUD: '$', RMB: '¥' };
+
+// e.g. formatMoney(100, 'AUD') => "$100.00 AUD" - includes the currency code
+// alongside the symbol since $ alone is ambiguous once bonds can be in more
+// than one currency.
+function formatMoney(amount, currency) {
+  const symbol = CURRENCY_SYMBOLS[currency] || '';
+  return `${symbol}${Number(amount).toFixed(2)} ${currency || 'AUD'}`;
+}
+
 function highlightNav() {
   const path = window.location.pathname;
   document.querySelectorAll('.nav-bar a.nav-item[href]').forEach((a) => {

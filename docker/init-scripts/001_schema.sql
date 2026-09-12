@@ -39,6 +39,7 @@ CREATE TABLE rentals (
   -- use the rate as-is".
   final_fee NUMERIC(10, 2),
   security_bond NUMERIC(10, 2),
+  security_bond_currency VARCHAR(10) NOT NULL DEFAULT 'AUD' CHECK (security_bond_currency IN ('AUD', 'RMB')),
   accessories_included TEXT,
   notes TEXT,
   -- Set once an overdue notification has been pushed to the portal for

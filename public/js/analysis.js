@@ -53,7 +53,8 @@ async function loadAnalysis() {
       statCard('Currently Overdue', overview.overdueCount, overview.overdueCount > 0 ? 'red' : 'green', 'Not scoped to the range above'),
       statCard('Fleet Utilization', Math.round(overview.fleetUtilization * 100) + '%', 'orange', `${overview.totalUnits} unit${overview.totalUnits === 1 ? '' : 's'} total`),
       statCard('Est. Total Revenue', money(overview.totalRevenue), 'green', 'From recorded fees, not a payment ledger'),
-      statCard('Bonds Currently Held', money(overview.bondsHeld), 'blue', 'Not scoped to the range above'),
+      statCard('Bonds Held (AUD)', money(overview.bondsHeldAud), 'blue', 'Not scoped to the range above'),
+      statCard('Bonds Held (RMB)', '¥' + Number(overview.bondsHeldRmb || 0).toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }), 'blue', 'Not scoped to the range above'),
       statCard('Avg. Rental Duration', days(overview.avgDurationDays), 'orange', 'Completed rentals only'),
       statCard('Avg. Days Late', days(overview.avgDaysLate), overview.avgDaysLate ? 'red' : 'green', 'Among late returns only'),
     ].join('');

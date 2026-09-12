@@ -81,8 +81,19 @@
       </div>
       <label for="editFinalFee">Final Rental Fee ($)</label>
       <input type="number" step="0.01" id="editFinalFee" placeholder="Leave blank unless giving a discount off the rate above">
-      <label for="editSecurityBond">Security Bond ($)</label>
-      <input type="number" step="0.01" id="editSecurityBond">
+      <div class="field-row">
+        <div>
+          <label for="editSecurityBond">Security Bond</label>
+          <input type="number" step="0.01" id="editSecurityBond">
+        </div>
+        <div>
+          <label for="editSecurityBondCurrency">Currency</label>
+          <select id="editSecurityBondCurrency">
+            <option value="AUD">AUD</option>
+            <option value="RMB">RMB</option>
+          </select>
+        </div>
+      </div>
       <label for="editAccessoriesIncluded">Accessories Included</label>
       <input type="text" id="editAccessoriesIncluded">
       <label for="editNotes">Notes</label>
