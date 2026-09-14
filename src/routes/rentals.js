@@ -4,6 +4,7 @@ import fs from 'fs';
 import multer from 'multer';
 import pool from '../db.js';
 import { clearPortalNotification } from '../lateNotifier.js';
+import { postRentalToOdoo } from '../odooSync.js';
 
 const router = express.Router();
 
@@ -131,7 +132,7 @@ router.post('/', async (req, res) => {
     await client.query('BEGIN');
 
     const unitResult = await client.query(
-      `SELECT manual_status, EXISTS (
+      `SELECT manual_status, odoo_barcode, EXISTS (
          SELECT 1 FROM rentals WHERE unit_id = $1 AND returned_at IS NULL
        ) AS has_open_rental
        FROM units WHERE id = $1`,
@@ -152,6 +153,7 @@ router.post('/', async (req, res) => {
     }
 
     let finalCustomerId = customer_id;
+    let customerPhone = new_customer?.phone || null;
     if (!finalCustomerId) {
       const { full_name, phone, address, email } = new_customer;
       const customerResult = await client.query(
@@ -159,6 +161,9 @@ router.post('/', async (req, res) => {
         [full_name, phone || null, address || null, email || null]
       );
       finalCustomerId = customerResult.rows[0].id;
+    } else {
+      const { rows: customerRows } = await client.query(`SELECT phone FROM customers WHERE id = $1`, [finalCustomerId]);
+      customerPhone = customerRows[0]?.phone || null;
     }
 
     const rentalResult = await client.query(
@@ -180,6 +185,13 @@ router.post('/', async (req, res) => {
     );
 
     await client.query('COMMIT');
+
+    postRentalToOdoo({
+      rental: { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, security_bond_currency },
+      unitBarcode: unit.odoo_barcode,
+      customerPhone,
+    });
+
     res.status(201).json({ success: true, message: 'Rental created', id: rentalResult.rows[0].id, customer_id: finalCustomerId });
   } catch (error) {
     await client.query('ROLLBACK');
