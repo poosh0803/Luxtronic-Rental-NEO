@@ -16,7 +16,7 @@ export function computeUnitStatus(unit) {
 // Shared SELECT fragment: units left-joined to their open (unreturned) rental + that rental's customer.
 export const UNIT_SELECT_WITH_OPEN_RENTAL = `
   SELECT
-    u.id, u.type, u.label, u.specs, u.serial_number, u.accessories, u.estimate_value,
+    u.id, u.type, u.label, u.specs, u.serial_number, u.odoo_barcode, u.accessories, u.estimate_value,
     u.manual_status, u.created_at,
     r.id AS open_rental_id, r.due_date AS open_due_date, r.start_date AS open_start_date,
     c.id AS open_customer_id, c.full_name AS open_customer_name

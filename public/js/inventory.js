@@ -119,6 +119,7 @@ window.editUnit = function (id) {
   document.getElementById('unitType').value = unit.type;
   document.getElementById('unitLabel').value = unit.label;
   document.getElementById('unitSerial').value = unit.serial_number || '';
+  document.getElementById('unitOdooBarcode').value = unit.odoo_barcode || '';
   document.getElementById('unitValue').value = unit.estimate_value || '';
   document.getElementById('unitAccessories').value = unit.accessories || '';
   document.getElementById('unitSpecs').value = specsToText(unit.specs);
@@ -170,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
       type: document.getElementById('unitType').value,
       label: document.getElementById('unitLabel').value,
       serial_number: document.getElementById('unitSerial').value,
+      odoo_barcode: document.getElementById('unitOdooBarcode').value,
       estimate_value: document.getElementById('unitValue').value || null,
       accessories: document.getElementById('unitAccessories').value,
       specs: textToSpecs(document.getElementById('unitSpecs').value),

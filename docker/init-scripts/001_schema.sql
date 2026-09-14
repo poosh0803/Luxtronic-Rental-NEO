@@ -5,6 +5,9 @@ CREATE TABLE units (
   label VARCHAR(100) NOT NULL,
   specs JSONB NOT NULL DEFAULT '{}',
   serial_number VARCHAR(100),
+  -- Odoo product barcode, used by the Odoo integration to find the matching
+  -- product when posting a sales order for a rental.
+  odoo_barcode VARCHAR(100),
   accessories TEXT,
   estimate_value NUMERIC(10, 2),
   manual_status VARCHAR(20) NOT NULL DEFAULT 'none' CHECK (manual_status IN ('none', 'in_repair', 'retired')),

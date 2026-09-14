@@ -44,14 +44,14 @@ router.get('/:id', async (req, res) => {
 // Create a unit
 router.post('/', async (req, res) => {
   try {
-    const { type, label, specs, serial_number, accessories, estimate_value } = req.body;
+    const { type, label, specs, serial_number, odoo_barcode, accessories, estimate_value } = req.body;
     if (!type || !label) {
       return res.status(400).json({ success: false, message: 'type and label are required' });
     }
     const { rows } = await pool.query(
-      `INSERT INTO units (type, label, specs, serial_number, accessories, estimate_value)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-      [type, label, specs || {}, serial_number || null, accessories || null, estimate_value || null]
+      `INSERT INTO units (type, label, specs, serial_number, odoo_barcode, accessories, estimate_value)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [type, label, specs || {}, serial_number || null, odoo_barcode || null, accessories || null, estimate_value || null]
     );
     res.status(201).json({ success: true, message: 'Unit created', id: rows[0].id });
   } catch (error) {
@@ -63,18 +63,19 @@ router.post('/', async (req, res) => {
 // Update a unit (specs, serial, accessories, estimate value, manual status)
 router.put('/:id', async (req, res) => {
   try {
-    const { type, label, specs, serial_number, accessories, estimate_value, manual_status } = req.body;
+    const { type, label, specs, serial_number, odoo_barcode, accessories, estimate_value, manual_status } = req.body;
     const { rowCount } = await pool.query(
       `UPDATE units SET
         type = COALESCE($1, type),
         label = COALESCE($2, label),
         specs = COALESCE($3, specs),
         serial_number = COALESCE($4, serial_number),
-        accessories = COALESCE($5, accessories),
-        estimate_value = COALESCE($6, estimate_value),
-        manual_status = COALESCE($7, manual_status)
-      WHERE id = $8`,
-      [type, label, specs, serial_number, accessories, estimate_value, manual_status, req.params.id]
+        odoo_barcode = COALESCE($5, odoo_barcode),
+        accessories = COALESCE($6, accessories),
+        estimate_value = COALESCE($7, estimate_value),
+        manual_status = COALESCE($8, manual_status)
+      WHERE id = $9`,
+      [type, label, specs, serial_number, odoo_barcode, accessories, estimate_value, manual_status, req.params.id]
     );
     if (rowCount === 0) {
       return res.status(404).json({ success: false, message: 'Unit not found' });

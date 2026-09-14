@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('unitInfo').innerHTML = `
       <div style="margin-bottom:10px;">${statusBadge(unit.status)}</div>
       <div>Estimate Value: ${unit.estimate_value ? '$' + Number(unit.estimate_value).toFixed(2) : '-'}</div>
+      <div>Odoo Barcode: ${escapeHtml(unit.odoo_barcode) || '-'}</div>
       <div>Accessories: ${escapeHtml(unit.accessories) || '-'}</div>
       ${specsList(unit.specs)}
     `;
