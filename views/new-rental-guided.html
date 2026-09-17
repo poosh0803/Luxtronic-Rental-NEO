@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Rental (Guided) - Luxtronic Rental</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="logo-container">
+    <img src="/images/logo.png" alt="Luxtronic" class="logo-img">
+    <a href="/" class="brand-name">LUXTRONIC</a>
+    <span class="tagline">Rental Tracker</span>
+  </div>
+  <div class="dark-mode-toggle" id="darkModeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
+</header>
+<nav class="nav-bar">
+  <a href="/" class="nav-item"><i class="fas fa-gauge-high"></i><span class="nav-text">Dashboard</span></a>
+  <a href="/inventory" class="nav-item"><i class="fas fa-desktop"></i><span class="nav-text">Inventory</span></a>
+  <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
+  <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
+  <a href="/analysis" class="nav-item"><i class="fas fa-chart-column"></i><span class="nav-text">Analysis</span></a>
+  <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
+</nav>
+<main style="max-width:720px;">
+  <div id="loadError"></div>
+
+  <div id="wizard">
+    <div class="wizard-progress" id="progressLabel">Step 1 of 10</div>
+    <div class="wizard-progress-track"><div class="wizard-progress-fill" id="progressFill" style="width:10%;"></div></div>
+
+    <form id="wizardForm">
+      <!-- Step 1: customer -->
+      <div class="wizard-step active" data-step="1">
+        <div class="panel">
+          <div class="wizard-question">Who's this rental for?</div>
+          <div class="wizard-hint">Pick an existing customer, or add a new one.</div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="existingCustomerToggle">
+            <label for="existingCustomerToggle" style="margin:0;">This is an existing customer</label>
+          </div>
+
+          <div id="existingCustomerBlock" style="display:none;">
+            <label for="customerSearch">Search by name or phone</label>
+            <input type="text" id="customerSearch" placeholder="Start typing...">
+            <div id="customerResults" style="margin-top:8px;"></div>
+            <div id="selectedCustomer" class="alert alert-info" style="display:none; margin-top:10px;"></div>
+          </div>
+
+          <div id="newCustomerBlock">
+            <div class="field-row">
+              <div>
+                <label for="custName">Full Name</label>
+                <input type="text" id="custName">
+              </div>
+              <div>
+                <label for="custPhone">Phone</label>
+                <input type="text" id="custPhone">
+              </div>
+            </div>
+            <label for="custAddress">Address</label>
+            <input type="text" id="custAddress">
+            <label for="custEmail">Email (optional)</label>
+            <input type="email" id="custEmail">
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: unit -->
+      <div class="wizard-step" data-step="2">
+        <div class="panel">
+          <div class="wizard-question">Which unit is going out?</div>
+          <label for="unitSearch">Search available units by label or serial</label>
+          <input type="text" id="unitSearch" placeholder="Start typing...">
+          <div id="unitResults" style="margin-top:8px;"></div>
+          <div id="selectedUnit" class="alert alert-info" style="display:none; margin-top:10px;"></div>
+          <div id="unitNote" class="alert alert-info" style="display:none; margin-top:10px;">No units are currently available. Add one in Inventory, or wait for a return.</div>
+        </div>
+      </div>
+
+      <!-- Step 3: rental period -->
+      <div class="wizard-step" data-step="3">
+        <div class="panel">
+          <div class="wizard-question">How long is it going out for?</div>
+          <div class="field-row">
+            <div>
+              <label for="startDate">Start Date</label>
+              <input type="date" id="startDate">
+            </div>
+            <div>
+              <label for="dueDate">Due Date</label>
+              <input type="date" id="dueDate">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: rental fee -->
+      <div class="wizard-step" data-step="4">
+        <div class="panel">
+          <div class="wizard-question">What's the rental rate?</div>
+          <div class="wizard-hint">Leave blank if you're not charging a rate for this one.</div>
+          <label for="rentalFee">Rental Fee ($)</label>
+          <input type="number" step="0.01" id="rentalFee">
+          <label>Per</label>
+          <div class="choice-grid" id="feeFrequencyChoices">
+            <button type="button" class="choice-btn selected" data-value="day"><i class="fas fa-calendar-day"></i>Day</button>
+            <button type="button" class="choice-btn" data-value="week"><i class="fas fa-calendar-week"></i>Week</button>
+            <button type="button" class="choice-btn" data-value="month"><i class="fas fa-calendar"></i>Month</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: final fee override -->
+      <div class="wizard-step" data-step="5">
+        <div class="panel">
+          <div class="wizard-question">Giving a discount off that rate?</div>
+          <div class="wizard-hint">Optional - only fill this in if the agreed total is different from rate x period.</div>
+          <label for="finalFee">Final Rental Fee ($)</label>
+          <input type="number" step="0.01" id="finalFee" placeholder="Leave blank unless giving a discount">
+        </div>
+      </div>
+
+      <!-- Step 6: security bond -->
+      <div class="wizard-step" data-step="6">
+        <div class="panel">
+          <div class="wizard-question">Taking a security bond?</div>
+          <label for="securityBond">Security Bond</label>
+          <input type="number" step="0.01" id="securityBond">
+          <label>Currency</label>
+          <div class="choice-grid" id="securityBondCurrencyChoices">
+            <button type="button" class="choice-btn selected" data-value="AUD"><i class="fas fa-dollar-sign"></i>AUD</button>
+            <button type="button" class="choice-btn" data-value="RMB"><i class="fas fa-yen-sign"></i>RMB</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 7: accessories -->
+      <div class="wizard-step" data-step="7">
+        <div class="panel">
+          <div class="wizard-question">What's going out with it?</div>
+          <div class="wizard-hint">Tap all that apply.</div>
+          <div class="choice-grid" id="accessoryChoices">
+            <button type="button" class="choice-btn" data-value="Charger"><i class="fas fa-plug"></i>Charger</button>
+            <button type="button" class="choice-btn" data-value="Bag"><i class="fas fa-briefcase"></i>Bag</button>
+            <button type="button" class="choice-btn" data-value="Powerbank"><i class="fas fa-battery-full"></i>Powerbank</button>
+            <button type="button" class="choice-btn" data-value="other"><i class="fas fa-ellipsis"></i>Other</button>
+          </div>
+          <label for="accessoriesOther">Other accessory details (optional)</label>
+          <input type="text" id="accessoriesOther" placeholder="e.g. Spare mouse">
+        </div>
+      </div>
+
+      <!-- Step 8: notes -->
+      <div class="wizard-step" data-step="8">
+        <div class="panel">
+          <div class="wizard-question">Anything else to note?</div>
+          <div class="wizard-hint">Optional.</div>
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="4"></textarea>
+        </div>
+      </div>
+
+      <!-- Step 9: photos -->
+      <div class="wizard-step" data-step="9">
+        <div class="panel">
+          <div class="wizard-question">Any checkout condition photos?</div>
+          <div class="wizard-hint">Optional - uploaded once the rental is created.</div>
+          <input type="file" id="checkoutPhotoInput" accept="image/*" multiple>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+      </div>
+
+      <!-- Step 10: review -->
+      <div class="wizard-step" data-step="10">
+        <div class="panel">
+          <div class="wizard-question">Review before checking out</div>
+          <div id="reviewContent"></div>
+        </div>
+      </div>
+    </form>
+
+    <div id="wizardError"></div>
+
+    <div class="wizard-nav">
+      <button type="button" class="btn" id="backBtn" style="display:none;">Back</button>
+      <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+      <button type="button" class="btn btn-primary" id="submitBtn" style="display:none;">Create Rental</button>
+    </div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/newRentalGuided.js"></script>
+</body>
+</html>

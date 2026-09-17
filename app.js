@@ -47,6 +47,7 @@ app.get('/', page('index'));
 app.get('/inventory', page('inventory'));
 app.get('/customers', page('customers'));
 app.get('/new-rental', page('new-rental'));
+app.get('/new-rental-guided', page('new-rental-guided'));
 app.get('/rental-detail', page('rental-detail'));
 app.get('/unit-detail', page('unit-detail'));
 app.get('/rental-history', page('rental-history'));

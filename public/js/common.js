@@ -41,8 +41,71 @@ function formatMoney(amount, currency) {
 
 function highlightNav() {
   const path = window.location.pathname;
+  // The guided wizard is a second entry point for the same "New Rental" nav
+  // item (whose href always points at the plain form - see
+  // initNewRentalChooser), so treat it as the same destination for
+  // highlighting purposes.
+  const effectivePath = path === '/new-rental-guided' ? '/new-rental' : path;
   document.querySelectorAll('.nav-bar a.nav-item[href]').forEach((a) => {
-    if (a.getAttribute('href') === path) a.classList.add('active');
+    if (a.getAttribute('href') === effectivePath) a.classList.add('active');
+  });
+}
+
+// Clicking "New Rental" in the nav asks whether to use the plain form or the
+// guided walkthrough, instead of jumping straight to the form. The link's
+// href stays "/new-rental" so opening it in a new tab (or with JS disabled)
+// still lands somewhere useful.
+function initNewRentalChooser() {
+  const links = document.querySelectorAll('a.nav-item-accent[href="/new-rental"]');
+  if (links.length === 0) return;
+
+  links.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      showNewRentalChooser();
+    });
+  });
+}
+
+function showNewRentalChooser() {
+  let overlay = document.getElementById('newRentalChooserOverlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+    return;
+  }
+
+  overlay = document.createElement('div');
+  overlay.id = 'newRentalChooserOverlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <h2>How do you want to check this out?</h2>
+      <p class="modal-sub">Both end up creating the same rental - pick whichever's easier right now.</p>
+      <div class="modal-choice-grid">
+        <button type="button" class="modal-choice" data-href="/new-rental">
+          <i class="fas fa-file-lines"></i>
+          <strong>Fill Out the Form</strong>
+          <span class="modal-choice-desc">One page, everything at once.</span>
+        </button>
+        <button type="button" class="modal-choice" data-href="/new-rental-guided">
+          <i class="fas fa-route"></i>
+          <strong>Guided Walkthrough</strong>
+          <span class="modal-choice-desc">Answer one quick question at a time.</span>
+        </button>
+      </div>
+      <div class="modal-close"><button type="button" class="btn" id="newRentalChooserCancel">Cancel</button></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    const choice = e.target.closest('.modal-choice');
+    if (choice) {
+      window.location.href = choice.dataset.href;
+      return;
+    }
+    if (e.target === overlay || e.target.id === 'newRentalChooserCancel') {
+      overlay.style.display = 'none';
+    }
   });
 }
 
@@ -78,4 +141,5 @@ function escapeHtml(str) {
 document.addEventListener('DOMContentLoaded', () => {
   highlightNav();
   initDarkMode();
+  initNewRentalChooser();
 });
