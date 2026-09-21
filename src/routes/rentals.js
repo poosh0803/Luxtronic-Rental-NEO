@@ -4,9 +4,20 @@ import fs from 'fs';
 import multer from 'multer';
 import pool from '../db.js';
 import { clearPortalNotification } from '../lateNotifier.js';
-import { postRentalToOdoo, updateRentalInOdoo } from '../odooSync.js';
+import { postRentalToOdoo, updateRentalInOdoo, returnRentalInOdoo, cancelRentalInOdoo } from '../odooSync.js';
 
 const router = express.Router();
+
+// The unit barcode + customer phone the Odoo API identifies an order by.
+async function getOdooSyncInfo(rentalId) {
+  const { rows } = await pool.query(
+    `SELECT u.odoo_barcode AS "unitBarcode", c.phone AS "customerPhone"
+     FROM rentals r JOIN units u ON u.id = r.unit_id JOIN customers c ON c.id = r.customer_id
+     WHERE r.id = $1`,
+    [rentalId]
+  );
+  return rows[0] || {};
+}
 
 const UPLOAD_ROOT = path.resolve('uploads', 'rentals');
 
@@ -241,15 +252,7 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
 
-    const { rows: syncRows } = await pool.query(
-      `SELECT u.odoo_barcode, c.phone FROM units u, customers c WHERE u.id = $1 AND c.id = $2`,
-      [rows[0].unit_id, rows[0].customer_id]
-    );
-    updateRentalInOdoo({
-      rental: rows[0],
-      unitBarcode: syncRows[0]?.odoo_barcode,
-      customerPhone: syncRows[0]?.phone,
-    });
+    updateRentalInOdoo({ rental: rows[0], ...(await getOdooSyncInfo(req.params.id)) });
 
     res.json({ success: true, message: 'Rental updated', rental: rows[0] });
   } catch (error) {
@@ -271,6 +274,7 @@ router.put('/:id/return', async (req, res) => {
     // The "overdue" alert is stale now that it's back - clear it from the
     // portal too, rather than leaving it to linger there forever.
     clearPortalNotification(rows[0].portal_notification_id);
+    returnRentalInOdoo(await getOdooSyncInfo(req.params.id));
     res.json({ success: true, message: 'Rental marked returned', rental: rows[0] });
   } catch (error) {
     console.error('Database error:', error);
@@ -283,10 +287,13 @@ router.put('/:id/return', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { rows: photos } = await pool.query(`SELECT file_path FROM rental_photos WHERE rental_id = $1`, [req.params.id]);
+    // Must be read before the row is deleted - it needs the unit/customer joins.
+    const odooSyncInfo = await getOdooSyncInfo(req.params.id);
     const { rows } = await pool.query(`DELETE FROM rentals WHERE id = $1 RETURNING portal_notification_id`, [req.params.id]);
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
+    cancelRentalInOdoo(odooSyncInfo);
     photos.forEach((p) => {
       fs.unlink(path.join(process.cwd(), p.file_path.replace(/^\//, '')), () => {});
     });

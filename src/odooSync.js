@@ -93,6 +93,19 @@ export async function postRentalToOdoo({ rental, unitBarcode, customerPhone }) {
   );
 }
 
+// Marks the rental's Odoo line as returned (restores stock there).
+export async function returnRentalInOdoo({ unitBarcode, customerPhone }) {
+  if (!canSync(unitBarcode, customerPhone)) return;
+  await postToOdoo('/rentals/return', { phone: customerPhone, sku: unitBarcode }, 'order return');
+}
+
+// Cancels the rental's Odoo order (it stays in Odoo for audit, not deleted) -
+// used when a rental is deleted here.
+export async function cancelRentalInOdoo({ unitBarcode, customerPhone }) {
+  if (!canSync(unitBarcode, customerPhone)) return;
+  await postToOdoo('/rentals/cancel', { phone: customerPhone, sku: unitBarcode }, 'order cancel');
+}
+
 // Pushes an edited rental's dates/price/bond onto its existing Odoo order
 // (the Odoo API finds that order by phone + barcode, so nothing Odoo-side is
 // stored here).
