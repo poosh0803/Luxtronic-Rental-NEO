@@ -4,7 +4,7 @@ import fs from 'fs';
 import multer from 'multer';
 import pool from '../db.js';
 import { clearPortalNotification } from '../lateNotifier.js';
-import { postRentalToOdoo } from '../odooSync.js';
+import { postRentalToOdoo, updateRentalInOdoo } from '../odooSync.js';
 
 const router = express.Router();
 
@@ -240,6 +240,17 @@ router.put('/:id', async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
+
+    const { rows: syncRows } = await pool.query(
+      `SELECT u.odoo_barcode, c.phone FROM units u, customers c WHERE u.id = $1 AND c.id = $2`,
+      [rows[0].unit_id, rows[0].customer_id]
+    );
+    updateRentalInOdoo({
+      rental: rows[0],
+      unitBarcode: syncRows[0]?.odoo_barcode,
+      customerPhone: syncRows[0]?.phone,
+    });
+
     res.json({ success: true, message: 'Rental updated', rental: rows[0] });
   } catch (error) {
     console.error('Database error:', error);
