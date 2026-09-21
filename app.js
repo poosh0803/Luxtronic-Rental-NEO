@@ -14,7 +14,7 @@ import analyticsRoutes from './src/routes/analytics.js';
 import { checkAndNotifyLateRentals } from './src/lateNotifier.js';
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 8003;
 const __dirname = path.resolve();
 
 app.use(cors());

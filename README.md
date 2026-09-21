@@ -76,7 +76,7 @@ Production mode:
 npm start
 ```
 
-The app will be available at `http://localhost:3002` (or whatever `PORT` is set to in `.env`), and the console will log "✅ Database connection successful" once it can reach PostgreSQL.
+The app will be available at `http://localhost:8003` (or whatever `PORT` is set to in `.env`), and the console will log "✅ Database connection successful" once it can reach PostgreSQL.
 
 ## Project Structure
 
