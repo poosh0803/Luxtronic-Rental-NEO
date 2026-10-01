@@ -32,6 +32,7 @@ let unitsCache = [];
 let currentTypeFilter = 'all';
 let currentSearchQuery = '';
 let currentSort = 'label_asc';
+let availableOnly = false;
 
 const STATUS_SORT_ORDER = { overdue: 0, in_repair: 1, rented: 2, available: 3, retired: 4 };
 
@@ -55,6 +56,7 @@ function sortUnits(units) {
 function renderUnits() {
   const body = document.getElementById('unitsBody');
   let units = currentTypeFilter === 'all' ? unitsCache : unitsCache.filter((u) => u.type === currentTypeFilter);
+  if (availableOnly) units = units.filter((u) => u.status === 'available');
   if (currentSearchQuery) {
     const q = currentSearchQuery.toLowerCase();
     units = units.filter(
@@ -148,6 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('unitSortSelect').addEventListener('change', (e) => {
     currentSort = e.target.value;
+    renderUnits();
+  });
+
+  document.getElementById('availableOnlyBtn').addEventListener('click', (e) => {
+    availableOnly = !availableOnly;
+    const btn = e.currentTarget;
+    btn.classList.toggle('active', availableOnly);
+    btn.setAttribute('aria-pressed', String(availableOnly));
     renderUnits();
   });
 
