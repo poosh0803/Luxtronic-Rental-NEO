@@ -10,7 +10,7 @@ const MS_PER_DAY = 86400000;
 // Same estimate as analytics.js's estimateRevenue(), but for a rental that's
 // only just been booked (no returned_at yet) - the agreed final fee if
 // staff set one, otherwise rate x periods over the planned start/due dates.
-function estimatePrice(rental) {
+export function estimatePrice(rental) {
   if (rental.final_fee) return Number(rental.final_fee);
   if (!rental.rental_fee || !rental.fee_frequency) return null;
   const periodDays = PERIOD_DAYS[rental.fee_frequency] || 1;

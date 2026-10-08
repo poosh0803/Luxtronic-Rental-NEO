@@ -48,11 +48,31 @@
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h2 style="margin:0;">Rental Terms</h2>
       <div class="actions-bar" style="margin-top:0;">
+        <button class="btn btn-sm" id="extendRentalBtn" style="display:none;">Extend</button>
         <button class="btn btn-sm" id="editRentalBtn">Edit</button>
         <button class="btn btn-sm btn-danger" id="deleteRentalBtn">Delete</button>
       </div>
     </div>
     <div id="termsInfo"></div>
+
+    <div id="extendForm" style="display:none; margin-top:16px;">
+      <h2 style="font-size:14px;">Extend rental</h2>
+      <div class="field-row">
+        <div>
+          <label for="extendDueDate">New Due Date</label>
+          <input type="date" id="extendDueDate">
+        </div>
+        <div>
+          <label for="extendExtraFee">Extra Charge ($, optional)</label>
+          <input type="number" step="0.01" min="0" id="extendExtraFee" placeholder="Added to the agreed total">
+        </div>
+      </div>
+      <div class="actions-bar">
+        <button class="btn btn-primary" id="confirmExtendBtn">Extend</button>
+        <button class="btn" id="cancelExtendBtn">Cancel</button>
+      </div>
+      <div id="extendError"></div>
+    </div>
 
     <div id="rentalEditForm" style="display:none; margin-top:16px;">
       <div class="field-row">

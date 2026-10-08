@@ -61,7 +61,7 @@ async function load() {
       <div><strong>Final Rental Fee:</strong> ${rental.final_fee ? '$' + Number(rental.final_fee).toFixed(2) : '-'}</div>
       <div><strong>Security Bond:</strong> ${rental.security_bond ? formatMoney(rental.security_bond, rental.security_bond_currency) : '-'}</div>
       <div><strong>Accessories:</strong> ${escapeHtml(rental.accessories_included) || '-'}</div>
-      <div><strong>Notes:</strong> ${escapeHtml(rental.notes) || '-'}</div>
+      <div style="white-space:pre-line;"><strong>Notes:</strong> ${escapeHtml(rental.notes) || '-'}</div>
       <div><strong>Returned:</strong> ${rental.returned_at ? formatDate(rental.returned_at) : 'Not yet returned'}</div>
     `;
 
@@ -78,6 +78,9 @@ async function load() {
         .join('') || '<div class="empty">None</div>';
     document.getElementById('returnPhotos').innerHTML =
       returnPhotos.map((p) => `<img src="${p.file_path}" alt="Return photo">`).join('') || '<div class="empty">None</div>';
+
+    document.getElementById('extendForm').style.display = 'none';
+    document.getElementById('extendRentalBtn').style.display = rental.returned_at ? 'none' : 'inline-block';
 
     if (rental.returned_at) {
       document.getElementById('returnPanel').style.display = 'none';
@@ -145,8 +148,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('extendRentalBtn').addEventListener('click', () => {
+    if (!currentRental) return;
+    // Default to one more week past the current due date.
+    const due = new Date(currentRental.due_date);
+    due.setDate(due.getDate() + 7);
+    document.getElementById('extendDueDate').value = toDateInputValue(due);
+    document.getElementById('extendExtraFee').value = '';
+    document.getElementById('extendError').innerHTML = '';
+    document.getElementById('rentalEditForm').style.display = 'none';
+    document.getElementById('extendForm').style.display = 'block';
+  });
+
+  document.getElementById('cancelExtendBtn').addEventListener('click', () => {
+    document.getElementById('extendForm').style.display = 'none';
+  });
+
+  document.getElementById('confirmExtendBtn').addEventListener('click', async () => {
+    const errorEl = document.getElementById('extendError');
+    errorEl.innerHTML = '';
+    try {
+      await fetchJSON(`/api/rentals/${getRentalId()}/extend`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          due_date: document.getElementById('extendDueDate').value,
+          extra_fee: document.getElementById('extendExtraFee').value || null,
+        }),
+      });
+      load();
+    } catch (err) {
+      errorEl.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+  });
+
   document.getElementById('editRentalBtn').addEventListener('click', () => {
     if (!currentRental) return;
+    document.getElementById('extendForm').style.display = 'none';
     document.getElementById('editStartDate').value = toDateInputValue(currentRental.start_date);
     document.getElementById('editDueDate').value = toDateInputValue(currentRental.due_date);
     document.getElementById('editRentalFee').value = currentRental.rental_fee || '';

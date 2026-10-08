@@ -4,7 +4,7 @@ import fs from 'fs';
 import multer from 'multer';
 import pool from '../db.js';
 import { clearPortalNotification } from '../lateNotifier.js';
-import { postRentalToOdoo, updateRentalInOdoo, returnRentalInOdoo, cancelRentalInOdoo } from '../odooSync.js';
+import { postRentalToOdoo, updateRentalInOdoo, estimatePrice, returnRentalInOdoo, cancelRentalInOdoo } from '../odooSync.js';
 
 const router = express.Router();
 
@@ -258,6 +258,54 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ success: false, message: 'Failed to update rental', error: error.message });
+  }
+});
+
+// Extend an open rental to a later due date, optionally adding an extra
+// charge on top of the agreed total. Resets the overdue alert (and clears
+// the one already on the portal), logs the change in the notes, and syncs
+// the new dates/price to Odoo.
+router.put('/:id/extend', async (req, res) => {
+  try {
+    const { due_date, extra_fee } = req.body;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(due_date || '')) {
+      return res.status(400).json({ success: false, message: 'A new due date is required' });
+    }
+    const extra = extra_fee === undefined || extra_fee === null || extra_fee === '' ? 0 : Number(extra_fee);
+    if (!Number.isFinite(extra) || extra < 0) {
+      return res.status(400).json({ success: false, message: 'Extra charge must be zero or more' });
+    }
+
+    const { rows: currentRows } = await pool.query(`SELECT * FROM rentals WHERE id = $1`, [req.params.id]);
+    const current = currentRows[0];
+    if (!current) return res.status(404).json({ success: false, message: 'Rental not found' });
+    if (current.returned_at) return res.status(409).json({ success: false, message: 'This rental has already been returned' });
+
+    const fmt = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    const oldDue = new Date(current.due_date);
+    const newDue = new Date(`${due_date}T00:00:00`);
+    if (newDue <= oldDue) {
+      return res.status(400).json({ success: false, message: `New due date must be after the current one (${fmt(oldDue)})` });
+    }
+
+    const newFinalFee = extra > 0 ? (estimatePrice(current) ?? 0) + extra : current.final_fee;
+    const logLine = `Extended from ${fmt(oldDue)} to ${fmt(newDue)}${extra > 0 ? ` (+$${extra.toFixed(2)})` : ''}`;
+
+    const { rows } = await pool.query(
+      `UPDATE rentals SET due_date = $1, final_fee = $2,
+         notes = CASE WHEN notes IS NULL OR notes = '' THEN $3 ELSE notes || E'\n' || $3 END,
+         late_notified_at = NULL, portal_notification_id = NULL
+       WHERE id = $4 RETURNING *`,
+      [due_date, newFinalFee, logLine, req.params.id]
+    );
+
+    clearPortalNotification(current.portal_notification_id);
+    updateRentalInOdoo({ rental: rows[0], ...(await getOdooSyncInfo(req.params.id)) });
+
+    res.json({ success: true, message: 'Rental extended', rental: rows[0] });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ success: false, message: 'Failed to extend rental', error: error.message });
   }
 });
 

@@ -126,7 +126,7 @@ Luxtronic-Rental-NEO/
 | `/customers` | Search, edit and delete customers, with each customer's rental history |
 | `/new-rental` | New rental as a single-page form |
 | `/new-rental-guided` | New rental as a step-by-step walkthrough (one question per screen, then a review step) |
-| `/rental-detail?id=` | One rental — edit, add/delete checkout photos, mark returned, delete |
+| `/rental-detail?id=` | One rental — extend, edit, add/delete checkout photos, mark returned, delete |
 | `/rental-history` | Every rental ever recorded, newest first |
 | `/analysis` | Fleet and rental stats |
 | `/print-agreement?id=` | Pre-filled Rental Agreement, ready to print |
@@ -156,6 +156,7 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 - `GET /:id/print-data` — everything the rental agreement page needs
 - `POST /` — check out a unit, either to an existing `customer_id` or a `new_customer` created in the same transaction. Blocked (`409`) if the unit is already out, in repair, or retired
 - `PUT /:id` — edit dates, fee, final fee, bond, bond currency, accessories or notes
+- `PUT /:id/extend` — extend an open rental to a later `due_date`, with an optional `extra_fee` added to the agreed total. Resets the overdue alert and appends a line to the notes; synced to Odoo like an edit
 - `PUT /:id/return` — mark returned
 - `DELETE /:id` — delete a rental and its condition photos
 - `POST /:id/photos` — upload one photo (multipart field `photo`, plus `stage` = `checkout` or `return`)
@@ -190,7 +191,7 @@ Every 30 minutes (and once at startup), `src/lateNotifier.js` finds rentals that
 | In Rental-Neo | In Odoo |
 |---|---|
 | Rental created | Rental order created, confirmed and marked picked-up |
-| Rental edited | That order's dates, price and bond updated |
+| Rental edited or extended | That order's dates, price and bond updated |
 | Rental marked returned | Order line marked returned (stock restored) |
 | Rental deleted | Order cancelled (kept in Odoo for audit) |
 
