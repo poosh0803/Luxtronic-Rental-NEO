@@ -55,6 +55,10 @@ CREATE TABLE rentals (
   -- returned or removed - otherwise a stale "overdue" alert lingers on the
   -- portal forever, since the portal has no idea the rental changed.
   portal_notification_id VARCHAR(100),
+  -- Same idea for the "due today" reminder pushed to the portal on the due
+  -- date itself, before the rental is overdue.
+  due_notified_at TIMESTAMPTZ,
+  due_portal_notification_id VARCHAR(100),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

@@ -219,6 +219,11 @@ router.put('/:id', async (req, res) => {
   try {
     const { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, security_bond_currency, accessories_included, notes } =
       req.body;
+    // A new due date makes any alert already on the portal stale - remember
+    // their ids now (the UPDATE below forgets them) so they can be removed.
+    const { rows: before } = due_date
+      ? await pool.query(`SELECT portal_notification_id, due_portal_notification_id FROM rentals WHERE id = $1`, [req.params.id])
+      : { rows: [] };
     const { rows } = await pool.query(
       `UPDATE rentals SET
         start_date = COALESCE($1, start_date),
@@ -233,7 +238,10 @@ router.put('/:id', async (req, res) => {
         -- Changing the due date means a rental that was already flagged
         -- overdue-and-notified should be eligible to notify again if the
         -- new date also passes unreturned.
-        late_notified_at = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE late_notified_at END
+        late_notified_at = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE late_notified_at END,
+        due_notified_at = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE due_notified_at END,
+        portal_notification_id = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE portal_notification_id END,
+        due_portal_notification_id = CASE WHEN $2::date IS NOT NULL THEN NULL ELSE due_portal_notification_id END
       WHERE id = $10 RETURNING *`,
       [
         start_date,
@@ -252,6 +260,10 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
 
+    if (before[0]) {
+      clearPortalNotification(before[0].portal_notification_id);
+      clearPortalNotification(before[0].due_portal_notification_id);
+    }
     updateRentalInOdoo({ rental: rows[0], ...(await getOdooSyncInfo(req.params.id)) });
 
     res.json({ success: true, message: 'Rental updated', rental: rows[0] });
@@ -294,12 +306,14 @@ router.put('/:id/extend', async (req, res) => {
     const { rows } = await pool.query(
       `UPDATE rentals SET due_date = $1, final_fee = $2,
          notes = CASE WHEN notes IS NULL OR notes = '' THEN $3 ELSE notes || E'\n' || $3 END,
-         late_notified_at = NULL, portal_notification_id = NULL
+         late_notified_at = NULL, portal_notification_id = NULL,
+         due_notified_at = NULL, due_portal_notification_id = NULL
        WHERE id = $4 RETURNING *`,
       [due_date, newFinalFee, logLine, req.params.id]
     );
 
     clearPortalNotification(current.portal_notification_id);
+    clearPortalNotification(current.due_portal_notification_id);
     updateRentalInOdoo({ rental: rows[0], ...(await getOdooSyncInfo(req.params.id)) });
 
     res.json({ success: true, message: 'Rental extended', rental: rows[0] });
@@ -322,6 +336,7 @@ router.put('/:id/return', async (req, res) => {
     // The "overdue" alert is stale now that it's back - clear it from the
     // portal too, rather than leaving it to linger there forever.
     clearPortalNotification(rows[0].portal_notification_id);
+    clearPortalNotification(rows[0].due_portal_notification_id);
     returnRentalInOdoo(await getOdooSyncInfo(req.params.id));
     res.json({ success: true, message: 'Rental marked returned', rental: rows[0] });
   } catch (error) {
@@ -337,7 +352,7 @@ router.delete('/:id', async (req, res) => {
     const { rows: photos } = await pool.query(`SELECT file_path FROM rental_photos WHERE rental_id = $1`, [req.params.id]);
     // Must be read before the row is deleted - it needs the unit/customer joins.
     const odooSyncInfo = await getOdooSyncInfo(req.params.id);
-    const { rows } = await pool.query(`DELETE FROM rentals WHERE id = $1 RETURNING portal_notification_id`, [req.params.id]);
+    const { rows } = await pool.query(`DELETE FROM rentals WHERE id = $1 RETURNING portal_notification_id, due_portal_notification_id`, [req.params.id]);
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Rental not found' });
     }
@@ -348,6 +363,7 @@ router.delete('/:id', async (req, res) => {
     // A deleted rental can't be looked up on the portal's "Open" link anymore
     // either way - clear its notification rather than leaving a dead link.
     clearPortalNotification(rows[0].portal_notification_id);
+    clearPortalNotification(rows[0].due_portal_notification_id);
     res.json({ success: true, message: 'Rental deleted' });
   } catch (error) {
     console.error('Database error:', error);

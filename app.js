@@ -11,7 +11,7 @@ import unitRoutes from './src/routes/units.js';
 import customerRoutes from './src/routes/customers.js';
 import rentalRoutes from './src/routes/rentals.js';
 import analyticsRoutes from './src/routes/analytics.js';
-import { checkAndNotifyLateRentals } from './src/lateNotifier.js';
+import { checkAndNotifyLateRentals, checkAndNotifyDueToday } from './src/lateNotifier.js';
 
 const app = express();
 const PORT = process.env.PORT || 8003;
@@ -62,12 +62,13 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// Periodically check for rentals that just became overdue and notify the
-// portal - see src/lateNotifier.js. Runs once at startup, then on an
+// Periodically check for rentals that are due today or just became overdue
+// and notify the portal - see src/lateNotifier.js. Runs once at startup, then on an
 // interval; failures are logged but never affect the app itself.
 const LATE_CHECK_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
 function runLateCheck() {
   checkAndNotifyLateRentals().catch((error) => console.error('Late rental check failed:', error));
+  checkAndNotifyDueToday().catch((error) => console.error('Due-today check failed:', error));
 }
 runLateCheck();
 setInterval(runLateCheck, LATE_CHECK_INTERVAL_MS);

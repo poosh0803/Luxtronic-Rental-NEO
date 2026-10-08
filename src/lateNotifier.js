@@ -61,7 +61,48 @@ export async function checkAndNotifyLateRentals() {
       message: `${rental.unit_label} rented to ${rental.customer_name} is ${daysLate} day${daysLate === 1 ? '' : 's'} overdue`,
       url: `${PUBLIC_BASE_URL}/rental-detail?id=${rental.id}`,
     });
-    await pool.query(`UPDATE rentals SET late_notified_at = now(), portal_notification_id = $2 WHERE id = $1`, [
+    // The overdue alert replaces the "due today" one - clear that one so the
+    // portal doesn't show both for the same rental.
+    const { rows: old } = await pool.query(`SELECT due_portal_notification_id FROM rentals WHERE id = $1`, [rental.id]);
+    clearPortalNotification(old[0]?.due_portal_notification_id);
+    await pool.query(
+      `UPDATE rentals SET late_notified_at = now(), portal_notification_id = $2, due_portal_notification_id = NULL WHERE id = $1`,
+      [rental.id, notificationId]
+    );
+  }
+
+  return rows.length;
+}
+
+// Hour of the day (server time, 0-23) from which "due today" reminders are
+// sent, so they land when the shop is open rather than just after midnight.
+const DUE_REMINDER_HOUR = Number(process.env.DUE_REMINDER_HOUR ?? 9);
+
+// Finds open rentals whose due date is today and haven't had a reminder yet,
+// pushes a one-time "due today" notification to the portal for each, and
+// marks them as reminded.
+export async function checkAndNotifyDueToday() {
+  if (new Date().getHours() < DUE_REMINDER_HOUR) return 0;
+
+  const { rows } = await pool.query(`
+    SELECT r.id, u.label AS unit_label, c.full_name AS customer_name
+    FROM rentals r
+    JOIN units u ON u.id = r.unit_id
+    JOIN customers c ON c.id = r.customer_id
+    WHERE r.returned_at IS NULL
+      AND r.due_date = CURRENT_DATE
+      AND r.due_notified_at IS NULL
+  `);
+
+  for (const rental of rows) {
+    const notificationId = await notifyPortal({
+      source: 'rental',
+      level: 'info',
+      title: 'Rental due today',
+      message: `${rental.unit_label} rented to ${rental.customer_name} is due back today`,
+      url: `${PUBLIC_BASE_URL}/rental-detail?id=${rental.id}`,
+    });
+    await pool.query(`UPDATE rentals SET due_notified_at = now(), due_portal_notification_id = $2 WHERE id = $1`, [
       rental.id,
       notificationId,
     ]);

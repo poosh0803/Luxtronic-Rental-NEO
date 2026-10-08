@@ -54,7 +54,7 @@ You can connect with a database GUI (VS Code PostgreSQL extension, pgAdmin, Tabl
 
 #### Upgrading an existing database
 
-Init scripts only run against an empty volume, so an existing database does **not** pick up new schema changes automatically. Scripts `003`–`007` are idempotent migrations (`ADD COLUMN IF NOT EXISTS`, guarded constraints) — run any you haven't applied yet, in order, against the database the app points at:
+Init scripts only run against an empty volume, so an existing database does **not** pick up new schema changes automatically. Scripts `003`–`008` are idempotent migrations (`ADD COLUMN IF NOT EXISTS`, guarded constraints) — run any you haven't applied yet, in order, against the database the app points at:
 
 | Script | Adds |
 |---|---|
@@ -63,6 +63,7 @@ Init scripts only run against an empty volume, so an existing database does **no
 | `005_add_portal_notification_id.sql` | `rentals.portal_notification_id` — to clear that alert later |
 | `006_add_security_bond_currency.sql` | `rentals.security_bond_currency` (`AUD` or `RMB`, default `AUD`) |
 | `007_add_odoo_barcode.sql` | `units.odoo_barcode` — how the unit is matched to its Odoo product |
+| `008_add_due_reminder.sql` | `rentals.due_notified_at`, `rentals.due_portal_notification_id` — for the on-the-due-date reminder |
 
 ### 4. Configure environment variables
 
@@ -77,6 +78,7 @@ cp .env.example .env
 | `PORT` | Port the app listens on (default `8003`) |
 | `PORTAL_NOTIFICATIONS_URL` | Optional. Luxtronic Portal notifications endpoint (default `http://192.168.68.255/api/notifications`) |
 | `PUBLIC_BASE_URL` | Optional. This app's public URL, used for the "Open" link on portal alerts (default `http://192.168.68.255:8003`) |
+| `DUE_REMINDER_HOUR` | Optional. Hour of the day (0–23, server time) from which "due today" reminders are sent (default `9`) |
 | `ODOO_API_URL` | Optional. Base URL of the Luxtronic Odoo API (default `http://localhost:4001`, correct when both run on the same server) |
 
 ### 5. Start the application
@@ -180,9 +182,14 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 * Analysis page: date-range filter, fleet utilization, estimated revenue, bonds held per currency, average rental duration and days late, on-time vs late returns, monthly volume and revenue trends, top units and customers, and units that have never been rented
 * Light/dark theme toggle, matching Luxtronic's other in-house tools
 
-### Overdue alerts to the Luxtronic Portal
+### Due-date and overdue alerts to the Luxtronic Portal
 
-Every 30 minutes (and once at startup), `src/lateNotifier.js` finds rentals that have just gone overdue and posts a one-time notification to the Luxtronic Portal. When the rental is later returned or deleted, that notification is removed from the portal again. A down portal never affects this app.
+Every 30 minutes (and once at startup), `src/lateNotifier.js` pushes two kinds of one-time notification to the Luxtronic Portal:
+
+* **Due today** (info) — for open rentals whose due date is today, from `DUE_REMINDER_HOUR` (default 9am) so it arrives while the shop is open.
+* **Overdue** (warning) — for open rentals past their due date. It replaces the due-today alert for that rental.
+
+A notification is removed from the portal again when the rental is returned, deleted, extended, or given a new due date (a new date also lets the alerts fire again). A down portal never affects this app.
 
 ### Odoo sync
 
