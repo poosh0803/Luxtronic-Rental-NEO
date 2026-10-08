@@ -2,6 +2,8 @@
 // so they show up as rental sale orders in Odoo Online. Fire-and-forget by
 // design: a down/misconfigured Odoo API must never affect this app's own
 // operation (same principle as lateNotifier.js's portal notifications).
+import pool from './db.js';
+
 const ODOO_API_URL = process.env.ODOO_API_URL || 'http://localhost:4001';
 const BOND_ODOO_BARCODE = 'RENTAL-BOND';
 const PERIOD_DAYS = { day: 1, week: 7, month: 30 };
@@ -54,7 +56,24 @@ function buildOdooFields(rental) {
   return fields;
 }
 
-async function postToOdoo(path, body, action) {
+// Every attempt (success or failure) is recorded so problems show up in the
+// app, not only in the server logs. Logging itself must never throw.
+async function logSync(rentalId, action, ok, message) {
+  try {
+    await pool.query(`INSERT INTO odoo_sync_log (rental_id, action, ok, message) VALUES ($1, $2, $3, $4)`, [
+      rentalId ?? null,
+      action,
+      ok,
+      message ? String(message).slice(0, 500) : null,
+    ]);
+  } catch (error) {
+    console.error('Odoo sync log write failed (ignored):', error.message);
+  }
+}
+
+// Returns { ok: true, data } or { ok: false, error } - callers that fire and
+// forget can ignore it; the retry button uses it.
+async function postToOdoo(path, body, action, rentalId) {
   try {
     const res = await fetch(`${ODOO_API_URL}${path}`, {
       method: 'POST',
@@ -63,53 +82,137 @@ async function postToOdoo(path, body, action) {
     });
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
-      console.error(`Odoo ${action} failed (ignored):`, errBody.error || res.status);
-      return;
+      const error = errBody.error || `HTTP ${res.status}`;
+      console.error(`Odoo ${action} failed (ignored):`, error);
+      await logSync(rentalId, action, false, error);
+      return { ok: false, error };
     }
-    console.log(`Odoo ${action} done:`, await res.json());
+    const data = await res.json();
+    console.log(`Odoo ${action} done:`, data);
+    await logSync(rentalId, action, true, data.orderId ? `order ${data.orderId}` : null);
+    return { ok: true, data };
   } catch (error) {
     console.error(`Odoo ${action} failed (ignored):`, error.message);
+    await logSync(rentalId, action, false, `Odoo API unreachable: ${error.message}`);
+    return { ok: false, error: `Odoo API unreachable: ${error.message}` };
   }
+}
+
+function skipReason(unitBarcode, customerPhone) {
+  if (!unitBarcode) return 'unit has no Odoo barcode set';
+  if (!customerPhone) return 'customer has no phone number';
+  return null;
 }
 
 function canSync(unitBarcode, customerPhone) {
-  if (!unitBarcode) {
-    console.log('Odoo sync skipped: unit has no Odoo barcode set.');
-    return false;
-  }
-  if (!customerPhone) {
-    console.log('Odoo sync skipped: customer has no phone number.');
-    return false;
-  }
-  return true;
+  const reason = skipReason(unitBarcode, customerPhone);
+  if (reason) console.log(`Odoo sync skipped: ${reason}.`);
+  return !reason;
 }
 
-export async function postRentalToOdoo({ rental, unitBarcode, customerPhone }) {
-  if (!canSync(unitBarcode, customerPhone)) return;
-  await postToOdoo(
+export async function postRentalToOdoo({ rental, unitBarcode, customerPhone, rentalId }) {
+  if (!canSync(unitBarcode, customerPhone)) return { ok: false, error: skipReason(unitBarcode, customerPhone) };
+  return postToOdoo(
     '/rentals',
     { customer: { phone: customerPhone }, sku: unitBarcode, quantity: 1, ...buildOdooFields(rental) },
-    'order creation'
+    'create',
+    rentalId ?? rental.id
   );
 }
 
 // Marks the rental's Odoo line as returned (restores stock there).
-export async function returnRentalInOdoo({ unitBarcode, customerPhone }) {
-  if (!canSync(unitBarcode, customerPhone)) return;
-  await postToOdoo('/rentals/return', { phone: customerPhone, sku: unitBarcode }, 'order return');
+export async function returnRentalInOdoo({ unitBarcode, customerPhone, rentalId }) {
+  if (!canSync(unitBarcode, customerPhone)) return { ok: false, error: skipReason(unitBarcode, customerPhone) };
+  return postToOdoo('/rentals/return', { phone: customerPhone, sku: unitBarcode }, 'return', rentalId);
 }
 
 // Cancels the rental's Odoo order (it stays in Odoo for audit, not deleted) -
 // used when a rental is deleted here.
-export async function cancelRentalInOdoo({ unitBarcode, customerPhone }) {
-  if (!canSync(unitBarcode, customerPhone)) return;
-  await postToOdoo('/rentals/cancel', { phone: customerPhone, sku: unitBarcode }, 'order cancel');
+export async function cancelRentalInOdoo({ unitBarcode, customerPhone, rentalId }) {
+  if (!canSync(unitBarcode, customerPhone)) return { ok: false, error: skipReason(unitBarcode, customerPhone) };
+  return postToOdoo('/rentals/cancel', { phone: customerPhone, sku: unitBarcode }, 'cancel', rentalId);
 }
 
 // Pushes an edited rental's dates/price/bond onto its existing Odoo order
 // (the Odoo API finds that order by phone + barcode, so nothing Odoo-side is
-// stored here).
-export async function updateRentalInOdoo({ rental, unitBarcode, customerPhone }) {
-  if (!canSync(unitBarcode, customerPhone)) return;
-  await postToOdoo('/rentals/update', { phone: customerPhone, sku: unitBarcode, ...buildOdooFields(rental) }, 'order update');
+// stored here). `extra` is merged into the request, e.g. { status: 'picked_up' }.
+export async function updateRentalInOdoo({ rental, unitBarcode, customerPhone, rentalId, extra = {} }) {
+  if (!canSync(unitBarcode, customerPhone)) return { ok: false, error: skipReason(unitBarcode, customerPhone) };
+  return postToOdoo(
+    '/rentals/update',
+    { phone: customerPhone, sku: unitBarcode, ...buildOdooFields(rental), ...extra },
+    'update',
+    rentalId ?? rental.id
+  );
+}
+
+const STATUS_LABELS = { pickup: 'Booked (not picked up)', return: 'Picked up', returned: 'Returned' };
+const dateOnly = (v) => String(v).slice(0, 10);
+
+// Read-only comparison of an open rental against its Odoo order. Resolves to
+// { state, reason?, differences?, odoo? } where state is one of:
+//   synced      - Odoo matches this rental
+//   mismatch    - the order exists but some values differ (see differences)
+//   missing     - no matching active order in Odoo
+//   skipped     - not tracked in Odoo (no barcode or phone) or already returned
+//   unavailable - the Odoo API could not be reached or returned an error
+export async function checkRentalInOdoo({ rental, unitBarcode, customerPhone }) {
+  if (rental.returned_at) return { state: 'skipped', reason: 'already returned' };
+  const reason = skipReason(unitBarcode, customerPhone);
+  if (reason) return { state: 'skipped', reason };
+
+  let odoo;
+  try {
+    const res = await fetch(`${ODOO_API_URL}/rentals/check?phone=${encodeURIComponent(customerPhone)}&sku=${encodeURIComponent(unitBarcode)}`);
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) return { state: 'unavailable', reason: body.error || `HTTP ${res.status}` };
+    odoo = body;
+  } catch (error) {
+    return { state: 'unavailable', reason: `Odoo API unreachable: ${error.message}` };
+  }
+
+  if (!odoo.found) return { state: 'missing', reason: odoo.reason };
+
+  const expected = buildOdooFields(rental);
+  const differences = [];
+  const add = (field, exp, act) => differences.push({ field, expected: exp, actual: act });
+
+  if (dateOnly(odoo.startDate) !== dateOnly(expected.startDate)) add('Start date', dateOnly(expected.startDate), dateOnly(odoo.startDate));
+  if (dateOnly(odoo.returnDate) !== dateOnly(expected.returnDate)) add('Return date', dateOnly(expected.returnDate), dateOnly(odoo.returnDate));
+  if (expected.price !== undefined && Math.abs(Number(odoo.rentalPrice) - expected.price) > 0.005) {
+    add('Rental price', expected.price.toFixed(2), odoo.rentalPrice === null ? '(none)' : Number(odoo.rentalPrice).toFixed(2));
+  }
+  if (expected.bond) {
+    if (odoo.bondPrice === null) add('Bond', expected.bond.amount.toFixed(2), '(none)');
+    else if (Math.abs(Number(odoo.bondPrice) - expected.bond.amount) > 0.005) add('Bond', expected.bond.amount.toFixed(2), Number(odoo.bondPrice).toFixed(2));
+  }
+  if (odoo.rentalStatus !== 'return') add('Status', STATUS_LABELS.return, STATUS_LABELS[odoo.rentalStatus] || odoo.rentalStatus);
+
+  return {
+    state: differences.length ? 'mismatch' : 'synced',
+    differences,
+    odoo: { orderId: odoo.orderId, orderName: odoo.orderName, activeOrderCount: odoo.activeOrderCount },
+  };
+}
+
+// Brings Odoo in line with an open rental: creates the order if it is
+// missing, or rewrites dates/price/bond/status if it differs. Does nothing
+// when already synced. Resolves to { action, ok, error?, check } with a
+// fresh check afterwards.
+export async function retryRentalSync({ rental, unitBarcode, customerPhone, rentalId }) {
+  const before = await checkRentalInOdoo({ rental, unitBarcode, customerPhone });
+  let action = 'none';
+  let result = { ok: true };
+
+  if (before.state === 'missing') {
+    action = 'created';
+    result = await postRentalToOdoo({ rental, unitBarcode, customerPhone, rentalId });
+  } else if (before.state === 'mismatch') {
+    action = 'updated';
+    result = await updateRentalInOdoo({ rental, unitBarcode, customerPhone, rentalId, extra: { status: 'picked_up' } });
+  } else if (before.state !== 'synced') {
+    return { action, ok: false, error: before.reason, check: before };
+  }
+
+  return { action, ok: result.ok, error: result.error, check: await checkRentalInOdoo({ rental, unitBarcode, customerPhone }) };
 }

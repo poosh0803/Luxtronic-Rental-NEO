@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rental History - Luxtronic Rental</title>
+<title>Odoo Sync - Luxtronic Rental</title>
 <link rel="icon" type="image/png" href="/images/logo.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
@@ -27,18 +27,37 @@
   <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
 </nav>
 <main>
-  <h1>Rental History</h1>
-  <p class="subtitle">Every rental ever recorded, newest first.</p>
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h1>Odoo Sync</h1>
+      <p class="subtitle">Every open rental compared with its order in Odoo. Checking never changes anything in Odoo.</p>
+    </div>
+    <button class="btn btn-primary" id="checkAllBtn"><i class="fas fa-rotate"></i> Check now</button>
+  </div>
+
+  <div id="loadError"></div>
+  <div class="stats-grid" id="statsGrid"></div>
 
   <div class="panel">
+    <h2>Open rentals</h2>
     <table>
-      <thead><tr><th>Unit</th><th>Type</th><th>Customer</th><th>Start</th><th>Due</th><th>Returned</th><th>Status</th></tr></thead>
-      <tbody id="historyBody"></tbody>
+      <thead><tr><th>Rental</th><th>Customer</th><th>Due</th><th>Odoo</th><th>Details</th><th></th></tr></thead>
+      <tbody id="rentalsBody"></tbody>
     </table>
-    <div id="historyEmpty" class="empty" style="display:none;">No rentals recorded yet.</div>
+    <div id="actionError"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Recent sync activity</h2>
+    <p class="subtitle" style="margin-bottom:12px;">Every attempt to send a change to Odoo, newest first.</p>
+    <table>
+      <thead><tr><th>When</th><th>Rental</th><th>Action</th><th>Result</th></tr></thead>
+      <tbody id="logBody"></tbody>
+    </table>
+    <div class="empty" id="logEmpty" style="display:none;">Nothing logged yet.</div>
   </div>
 </main>
 <script src="/js/common.js"></script>
-<script src="/js/rentalHistory.js"></script>
+<script src="/js/odooSync.js"></script>
 </body>
 </html>

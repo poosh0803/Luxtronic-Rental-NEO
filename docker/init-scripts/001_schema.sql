@@ -77,3 +77,18 @@ CREATE TABLE rental_photos (
 );
 
 CREATE INDEX idx_rental_photos_rental ON rental_photos (rental_id);
+
+-- Every attempt to mirror a rental to Odoo, successful or not, so failures
+-- are visible in the app and not only in the server logs.
+CREATE TABLE odoo_sync_log (
+  id SERIAL PRIMARY KEY,
+  -- Not a foreign key on purpose: the log must outlive a deleted rental.
+  rental_id INTEGER,
+  action VARCHAR(20) NOT NULL,
+  ok BOOLEAN NOT NULL,
+  message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_odoo_sync_log_created ON odoo_sync_log (created_at DESC);
+CREATE INDEX idx_odoo_sync_log_rental ON odoo_sync_log (rental_id);

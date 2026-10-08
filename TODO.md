@@ -4,7 +4,7 @@ Feature ideas, roughly in priority order.
 
 ## Next up
 
-- [ ] **Odoo sync status and retry** — show a "synced / failed" badge on each rental and add a "Retry sync" button. Sync failures are currently only visible in the pm2 logs.
+- [x] **Odoo sync status and check** — Odoo Sync page (every open rental checked against its Odoo order, with sync stats and a persistent activity log), a status panel with "Fix now" on each rental, and failures no longer only in the pm2 logs.
 - [ ] **Return checklist and bond settlement** — record damage and costs when a rental is returned, calculate the bond refund, and track the bond as held / refunded / forfeited (not tracked at all today).
 
 ## Planned

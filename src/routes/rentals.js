@@ -11,7 +11,7 @@ const router = express.Router();
 // The unit barcode + customer phone the Odoo API identifies an order by.
 async function getOdooSyncInfo(rentalId) {
   const { rows } = await pool.query(
-    `SELECT u.odoo_barcode AS "unitBarcode", c.phone AS "customerPhone"
+    `SELECT r.id AS "rentalId", u.odoo_barcode AS "unitBarcode", c.phone AS "customerPhone"
      FROM rentals r JOIN units u ON u.id = r.unit_id JOIN customers c ON c.id = r.customer_id
      WHERE r.id = $1`,
     [rentalId]
@@ -201,6 +201,7 @@ router.post('/', async (req, res) => {
       rental: { start_date, due_date, rental_fee, fee_frequency, final_fee, security_bond, security_bond_currency },
       unitBarcode: unit.odoo_barcode,
       customerPhone,
+      rentalId: rentalResult.rows[0].id,
     });
 
     res.status(201).json({ success: true, message: 'Rental created', id: rentalResult.rows[0].id, customer_id: finalCustomerId });

@@ -11,6 +11,7 @@ import unitRoutes from './src/routes/units.js';
 import customerRoutes from './src/routes/customers.js';
 import rentalRoutes from './src/routes/rentals.js';
 import analyticsRoutes from './src/routes/analytics.js';
+import odooRoutes from './src/routes/odoo.js';
 import { checkAndNotifyLateRentals, checkAndNotifyDueToday } from './src/lateNotifier.js';
 
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api/units', unitRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/rentals', rentalRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/odoo', odooRoutes);
 
 // Static pages
 const page = (name) => (req, res) => res.sendFile(path.join(__dirname, 'views', `${name}.html`));
@@ -52,6 +54,7 @@ app.get('/rental-detail', page('rental-detail'));
 app.get('/unit-detail', page('unit-detail'));
 app.get('/rental-history', page('rental-history'));
 app.get('/analysis', page('analysis'));
+app.get('/odoo-sync', page('odoo-sync'));
 app.get('/print-agreement', page('print-agreement'));
 
 app.use((req, res) => {

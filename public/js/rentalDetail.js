@@ -90,6 +90,20 @@ async function load() {
   }
 }
 
+async function checkOdoo() {
+  const status = document.getElementById('odooStatus');
+  const fixBtn = document.getElementById('odooFixBtn');
+  fixBtn.style.display = 'none';
+  status.textContent = 'Checking...';
+  try {
+    const { check } = await fetchJSON(`/api/odoo/rentals/${getRentalId()}`);
+    status.innerHTML = `${syncBadge(check.state)} <span style="margin-left:6px;">${syncDetails(check)}</span>`;
+    fixBtn.style.display = ['missing', 'mismatch'].includes(check.state) ? 'inline-block' : 'none';
+  } catch (err) {
+    status.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+  }
+}
+
 window.deleteCheckoutPhoto = async function (photoId) {
   if (!confirm('Delete this checkout photo?')) return;
   const errorEl = document.getElementById('checkoutPhotoError');
@@ -104,6 +118,24 @@ window.deleteCheckoutPhoto = async function (photoId) {
 
 document.addEventListener('DOMContentLoaded', () => {
   load();
+  checkOdoo();
+
+  document.getElementById('odooCheckBtn').addEventListener('click', checkOdoo);
+  document.getElementById('odooFixBtn').addEventListener('click', async () => {
+    if (!confirm('Update Odoo to match this rental?')) return;
+    const status = document.getElementById('odooStatus');
+    const fixBtn = document.getElementById('odooFixBtn');
+    fixBtn.disabled = true;
+    status.textContent = 'Updating Odoo...';
+    try {
+      const result = await fetchJSON(`/api/odoo/rentals/${getRentalId()}/retry`, { method: 'POST' });
+      if (result.ok) await checkOdoo();
+      else status.innerHTML = `<div class="alert alert-danger">${escapeHtml(result.error || 'Sync failed')}</div>`;
+    } catch (err) {
+      status.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.message)}</div>`;
+    }
+    fixBtn.disabled = false;
+  });
 
   document.getElementById('addCheckoutPhotoBtn').addEventListener('click', async () => {
     const errorEl = document.getElementById('checkoutPhotoError');

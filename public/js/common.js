@@ -39,6 +39,33 @@ function formatMoney(amount, currency) {
   return `${symbol}${Number(amount).toFixed(2)} ${currency || 'AUD'}`;
 }
 
+// How an Odoo sync check result is shown (Odoo Sync page and rental page).
+const SYNC_STATE = {
+  synced: { label: 'Synced', badge: 'badge-available' },
+  mismatch: { label: 'Out of sync', badge: 'badge-in_repair' },
+  missing: { label: 'Not in Odoo', badge: 'badge-overdue' },
+  skipped: { label: 'Not tracked', badge: 'badge-retired' },
+  unavailable: { label: 'Odoo unreachable', badge: 'badge-overdue' },
+};
+
+function syncBadge(state) {
+  const s = SYNC_STATE[state] || { label: state, badge: 'badge-retired' };
+  return `<span class="badge ${s.badge}">${s.label}</span>`;
+}
+
+function syncDetails(check) {
+  if (check.differences && check.differences.length) {
+    return check.differences
+      .map((d) => `${escapeHtml(d.field)}: Rental-Neo <strong>${escapeHtml(d.expected)}</strong>, Odoo <strong>${escapeHtml(d.actual)}</strong>`)
+      .join('<br>');
+  }
+  if (check.state === 'synced') {
+    const extra = check.odoo && check.odoo.orderName ? `Order ${escapeHtml(check.odoo.orderName)}` : '';
+    return extra || 'Matches';
+  }
+  return escapeHtml(check.reason || '');
+}
+
 function highlightNav() {
   const path = window.location.pathname;
   // The guided wizard is a second entry point for the same "New Rental" nav

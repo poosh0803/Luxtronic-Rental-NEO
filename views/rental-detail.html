@@ -23,6 +23,7 @@
   <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
   <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
   <a href="/analysis" class="nav-item"><i class="fas fa-chart-column"></i><span class="nav-text">Analysis</span></a>
+  <a href="/odoo-sync" class="nav-item"><i class="fas fa-rotate"></i><span class="nav-text">Odoo</span></a>
   <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
 </nav>
 <main>
@@ -138,6 +139,17 @@
     <div id="checkoutPhotoError"></div>
     <h2 style="font-size:14px; color:var(--muted); margin-top:16px;">Return</h2>
     <div class="photo-grid" id="returnPhotos"></div>
+  </div>
+
+  <div class="panel" id="odooPanel">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+      <h2 style="margin:0;">Odoo</h2>
+      <div class="actions-bar" style="margin-top:0;">
+        <button class="btn btn-sm" id="odooCheckBtn">Check</button>
+        <button class="btn btn-sm btn-primary" id="odooFixBtn" style="display:none;">Fix now</button>
+      </div>
+    </div>
+    <div id="odooStatus" style="margin-top:10px; font-size:14px;">Checking...</div>
   </div>
 
   <div class="panel" id="returnPanel">

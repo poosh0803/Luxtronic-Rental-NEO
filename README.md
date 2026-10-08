@@ -54,7 +54,7 @@ You can connect with a database GUI (VS Code PostgreSQL extension, pgAdmin, Tabl
 
 #### Upgrading an existing database
 
-Init scripts only run against an empty volume, so an existing database does **not** pick up new schema changes automatically. Scripts `003`–`008` are idempotent migrations (`ADD COLUMN IF NOT EXISTS`, guarded constraints) — run any you haven't applied yet, in order, against the database the app points at:
+Init scripts only run against an empty volume, so an existing database does **not** pick up new schema changes automatically. Scripts `003`–`009` are idempotent migrations (`ADD COLUMN IF NOT EXISTS`, guarded constraints) — run any you haven't applied yet, in order, against the database the app points at:
 
 | Script | Adds |
 |---|---|
@@ -63,6 +63,7 @@ Init scripts only run against an empty volume, so an existing database does **no
 | `005_add_portal_notification_id.sql` | `rentals.portal_notification_id` — to clear that alert later |
 | `006_add_security_bond_currency.sql` | `rentals.security_bond_currency` (`AUD` or `RMB`, default `AUD`) |
 | `007_add_odoo_barcode.sql` | `units.odoo_barcode` — how the unit is matched to its Odoo product |
+| `009_add_odoo_sync_log.sql` | `odoo_sync_log` table — every attempt to send a change to Odoo, with its result |
 | `008_add_due_reminder.sql` | `rentals.due_notified_at`, `rentals.due_portal_notification_id` — for the on-the-due-date reminder |
 
 ### 4. Configure environment variables
@@ -128,9 +129,10 @@ Luxtronic-Rental-NEO/
 | `/customers` | Search, edit and delete customers, with each customer's rental history |
 | `/new-rental` | New rental as a single-page form |
 | `/new-rental-guided` | New rental as a step-by-step walkthrough (one question per screen, then a review step) |
-| `/rental-detail?id=` | One rental — extend, edit, add/delete checkout photos, mark returned, delete |
+| `/rental-detail?id=` | One rental — Odoo sync status, extend, edit, add/delete checkout photos, mark returned, delete |
 | `/rental-history` | Every rental ever recorded, newest first |
 | `/analysis` | Fleet and rental stats |
+| `/odoo-sync` | Odoo sync check: every open rental compared with its Odoo order, sync stats and recent activity |
 | `/print-agreement?id=` | Pre-filled Rental Agreement, ready to print |
 
 Clicking **New Rental** in the nav asks whether to use the form or the guided walkthrough. Both create exactly the same rental.
@@ -166,6 +168,11 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 
 **Analytics** (`/api/analytics`)
 - `GET /rentals?range=all|this_month|last_month` — stats for the Analysis page
+
+**Odoo sync** (`/api/odoo`)
+- `GET /status` — every open rental checked against Odoo (read-only), plus sync-log stats and the 30 most recent log entries
+- `GET /rentals/:id` — check one rental
+- `POST /rentals/:id/retry` — bring Odoo in line with the rental: creates the order if it is missing, or corrects dates, price, bond and picked-up status if they differ
 
 **Config**
 - `GET /api/config` — the business details printed on the agreement
@@ -206,7 +213,21 @@ A notification is removed from the portal again when the rental is returned, del
 * The **price** sent is the final fee if set, otherwise rate × periods (a period is 1, 7 or 30 days).
 * The **bond** is sent as a separate line using the `RENTAL-BOND` product — only when it's in AUD. RMB bonds are skipped and logged.
 * A rental is skipped (and logged) if its unit has no Odoo barcode or its customer has no phone number.
-* Sync is fire-and-forget: a failure is logged but never blocks the action in this app. Check the pm2 logs for lines starting `Odoo`.
+* Sync is fire-and-forget: a failure never blocks the action in this app. Every attempt is recorded in the `odoo_sync_log` table and shown on the **Odoo Sync** page (and in the pm2 logs as lines starting `Odoo`).
+
+#### Checking and fixing sync
+
+The **Odoo Sync** page compares each open rental with its Odoo order — dates, rental price, bond (AUD) and picked-up status — and labels it:
+
+| Label | Meaning |
+|---|---|
+| Synced | Odoo matches |
+| Out of sync | The order exists but a value differs (the page shows both values) |
+| Not in Odoo | No active order for this customer and unit |
+| Not tracked | The unit has no Odoo barcode or the customer has no phone number |
+| Odoo unreachable | The Odoo API could not be reached |
+
+Checking never writes to Odoo. **Fix now** (on the page or on a rental) writes the rental's current values to Odoo — it creates a missing order or corrects a differing one. Returned rentals are not checked.
 
 ## Deployment
 
