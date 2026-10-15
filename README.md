@@ -132,6 +132,7 @@ Luxtronic-Rental-NEO/
 | `/rental-detail?id=` | One rental — Odoo sync status, extend, edit, add/delete checkout photos, mark returned, delete |
 | `/rental-history` | Every rental ever recorded, newest first |
 | `/analysis` | Fleet and rental stats |
+| `/status` | Graphs: fleet status, rentals falling due over the next 14 days, Odoo sync status and activity, plus growth — revenue to date, rentals to date, units out over time and weekly revenue by type |
 | `/odoo-sync` | Odoo sync check: every open rental compared with its Odoo order, sync stats and recent activity |
 | `/print-agreement?id=` | Pre-filled Rental Agreement, ready to print |
 
@@ -168,6 +169,8 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 
 **Analytics** (`/api/analytics`)
 - `GET /rentals?range=all|this_month|last_month` — stats for the Analysis page
+- `GET /status` — data for the Status page graphs (fleet status, due dates, sync activity)
+- `GET /growth` — cumulative revenue and rentals, units out over time and weekly revenue by type (same revenue estimate as the Analysis page, counted on each rental's start date)
 
 **Odoo sync** (`/api/odoo`)
 - `GET /status` — every open rental checked against Odoo (read-only), plus sync-log stats and the 30 most recent log entries

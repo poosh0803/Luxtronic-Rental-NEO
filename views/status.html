@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status - Luxtronic Rental</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="logo-container">
+    <img src="/images/logo.png" alt="Luxtronic" class="logo-img">
+    <a href="/" class="brand-name">LUXTRONIC</a>
+    <span class="tagline">Rental Tracker</span>
+  </div>
+  <div class="dark-mode-toggle" id="darkModeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
+</header>
+<nav class="nav-bar">
+  <a href="/" class="nav-item"><i class="fas fa-gauge-high"></i><span class="nav-text">Dashboard</span></a>
+  <a href="/inventory" class="nav-item"><i class="fas fa-desktop"></i><span class="nav-text">Inventory</span></a>
+  <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
+  <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
+  <a href="/analysis" class="nav-item"><i class="fas fa-chart-column"></i><span class="nav-text">Analysis</span></a>
+  <a href="/status" class="nav-item"><i class="fas fa-chart-pie"></i><span class="nav-text">Status</span></a>
+  <a href="/odoo-sync" class="nav-item"><i class="fas fa-rotate"></i><span class="nav-text">Odoo</span></a>
+  <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
+</nav>
+<main>
+  <h1>Status</h1>
+  <p class="subtitle">The fleet, upcoming returns and Odoo sync at a glance.</p>
+  <div id="loadError"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Fleet status</h2>
+      <div id="fleetChart"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <h2>Odoo sync status</h2>
+      <div id="syncStateChart"><div class="empty">Checking Odoo...</div></div>
+      <a href="/odoo-sync" class="btn btn-sm" style="margin-top:8px;">Details</a>
+    </div>
+    <div class="panel">
+      <h2>Rentals falling due</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Open rentals by due date, next 14 days.</p>
+      <div id="dueChart"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <h2>Odoo sync activity</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Changes sent to Odoo per day, last 14 days.</p>
+      <div id="syncActivityChart"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+
+  <h2 style="margin:28px 0 12px; font-size:20px;">Growth</h2>
+  <div class="stats-grid" id="growthStats"></div>
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Revenue to date</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Cumulative estimated revenue, counted from each rental's start date.</p>
+      <div id="revenueChart"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <h2>Rentals to date</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Total rentals started.</p>
+      <div id="rentalsChart"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <h2>Units out</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Share of the fleet out on rental.</p>
+      <div id="utilizationChart"><div class="empty">Loading...</div></div>
+    </div>
+    <div class="panel">
+      <h2>Weekly revenue by type</h2>
+      <p class="subtitle" style="margin-bottom:8px;">Last 12 weeks, desktops vs laptops.</p>
+      <div id="weeklyChart"><div class="empty">Loading...</div></div>
+    </div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/status.js"></script>
+</body>
+</html>

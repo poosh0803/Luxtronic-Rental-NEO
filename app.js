@@ -54,6 +54,7 @@ app.get('/rental-detail', page('rental-detail'));
 app.get('/unit-detail', page('unit-detail'));
 app.get('/rental-history', page('rental-history'));
 app.get('/analysis', page('analysis'));
+app.get('/status', page('status'));
 app.get('/odoo-sync', page('odoo-sync'));
 app.get('/print-agreement', page('print-agreement'));
 
