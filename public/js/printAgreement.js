@@ -16,6 +16,31 @@ function setChecked(id, on) {
   if (el && on) el.classList.add('checked');
 }
 
+// Lists the unit's specs (CPU, RAM, ...) as a two-pairs-per-row table. The
+// whole block stays hidden when the unit has no specs recorded.
+function renderSpecs(specs) {
+  const entries = specs && typeof specs === 'object' ? Object.entries(specs).filter(([, v]) => String(v ?? '').trim()) : [];
+  if (entries.length === 0) return;
+
+  const table = document.getElementById('specsTable');
+  for (let i = 0; i < entries.length; i += 2) {
+    const tr = document.createElement('tr');
+    for (const [key, value] of entries.slice(i, i + 2)) {
+      const th = document.createElement('th');
+      th.textContent = key;
+      const td = document.createElement('td');
+      td.textContent = value;
+      tr.append(th, td);
+    }
+    // Odd count: pad the last row so the table stays rectangular.
+    if (entries.slice(i, i + 2).length === 1) {
+      tr.append(document.createElement('th'), document.createElement('td'));
+    }
+    table.appendChild(tr);
+  }
+  document.getElementById('specsBlock').style.display = '';
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
@@ -51,6 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setChecked('checkDesktop', rental.unit_type === 'desktop');
     setText('equipMakeModel', rental.unit_label);
     setText('equipSerial', rental.serial_number);
+
+    renderSpecs(rental.specs);
 
     const accessories = (rental.accessories_included || '').toLowerCase();
     setChecked('checkCharger', accessories.includes('charger'));

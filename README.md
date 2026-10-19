@@ -188,7 +188,7 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 * Checkout and return flows with condition photos, plus a confirmation before marking a rental returned
 * Rental fee per day, week or month, with an optional final fee for discounts
 * Security bond in AUD or RMB, kept separate everywhere — including the Analysis totals
-* One-click print of a pre-filled Rental Agreement, with page numbers, for the customer to sign on paper. The contract text lives in `views/print-agreement.html`, so changing a clause is a plain HTML edit
+* One-click print of a pre-filled Rental Agreement, including the unit's specifications, with page numbers, for the customer to sign on paper. The contract text lives in `views/print-agreement.html`, so changing a clause is a plain HTML edit
 * Analysis page: date-range filter, fleet utilization, estimated revenue, bonds held per currency, average rental duration and days late, on-time vs late returns, monthly volume and revenue trends, top units and customers, and units that have never been rented
 * Light/dark theme toggle, matching Luxtronic's other in-house tools
 

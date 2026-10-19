@@ -83,6 +83,13 @@ h3.section-title {
 }
 .check-item { margin-right: 16px; white-space: nowrap; }
 
+/* Equipment specs: label/value pairs, two pairs per row to keep page 1 short. */
+.specs-block { break-inside: avoid; page-break-inside: avoid; }
+table.specs-table { width: 100%; border-collapse: collapse; margin: 4px 0 6px; font-size: 11.5px; }
+table.specs-table th, table.specs-table td { border: 1px solid #999; padding: 3px 6px; text-align: left; vertical-align: top; }
+table.specs-table th { background: #f3f4f6; width: 9%; white-space: nowrap; }
+table.specs-table td { width: 41%; }
+
 table.schedule-a { width: 100%; border-collapse: collapse; margin: 8px 0 14px; font-size: 11.5px; }
 table.schedule-a th, table.schedule-a td { border: 1px solid #999; padding: 5px 7px; text-align: left; }
 table.schedule-a th { background: #f3f4f6; }
