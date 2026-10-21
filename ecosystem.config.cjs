@@ -3,7 +3,7 @@
 module.exports = {
   apps: [
     {
-      name: 'luxtronic-rental',
+      name: 'luxtronic-rental-neo',
       script: 'app.js',
       exec_mode: 'fork',
       instances: 1,
