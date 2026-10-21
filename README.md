@@ -63,8 +63,8 @@ Init scripts only run against an empty volume, so an existing database does **no
 | `005_add_portal_notification_id.sql` | `rentals.portal_notification_id` — to clear that alert later |
 | `006_add_security_bond_currency.sql` | `rentals.security_bond_currency` (`AUD` or `RMB`, default `AUD`) |
 | `007_add_odoo_barcode.sql` | `units.odoo_barcode` — how the unit is matched to its Odoo product |
-| `009_add_odoo_sync_log.sql` | `odoo_sync_log` table — every attempt to send a change to Odoo, with its result |
 | `008_add_due_reminder.sql` | `rentals.due_notified_at`, `rentals.due_portal_notification_id` — for the on-the-due-date reminder |
+| `009_add_odoo_sync_log.sql` | `odoo_sync_log` table — every attempt to send a change to Odoo, with its result |
 
 ### 4. Configure environment variables
 
@@ -105,9 +105,9 @@ Luxtronic-Rental-NEO/
 ├── app.js                  # Express app: static files, API routes, page routes, overdue check timer
 ├── src/
 │   ├── db.js               # PostgreSQL connection pool
-│   ├── lateNotifier.js     # Overdue-rental alerts pushed to the Luxtronic Portal
+│   ├── lateNotifier.js     # Due-today and overdue alerts pushed to the Luxtronic Portal
 │   ├── odooSync.js         # Mirrors rentals to Odoo via the Luxtronic Odoo API
-│   ├── routes/             # API routes: units, customers, rentals, analytics
+│   ├── routes/             # API routes: units, customers, rentals, analytics, odoo
 │   └── utils/unitStatus.js # Computes a unit's display status
 ├── views/                  # HTML pages
 ├── public/
@@ -131,6 +131,7 @@ Luxtronic-Rental-NEO/
 | `/new-rental-guided` | New rental as a step-by-step walkthrough (one question per screen, then a review step) |
 | `/rental-detail?id=` | One rental — Odoo sync status, extend, edit, add/delete checkout photos, mark returned, delete |
 | `/rental-history` | Every rental ever recorded, newest first |
+| `/calendar` | Which machines are out on which days: a month calendar (desktop / laptop counts per day, click a day for the list) and a timeline with one row per machine; **Activity only** shows just the start day and return / due-back day of each rental |
 | `/analysis` | Fleet and rental stats |
 | `/status` | Graphs: fleet status, rentals falling due over the next 14 days, Odoo sync status and activity, plus growth — revenue to date, rentals to date, units out over time and weekly revenue by type |
 | `/odoo-sync` | Odoo sync check: every open rental compared with its Odoo order, sync stats and recent activity |
@@ -156,7 +157,7 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 - `DELETE /:id` — delete a customer; blocked (`409`) if they have any rental history
 
 **Rentals** (`/api/rentals`)
-- `GET /` — all rentals; optional `?status=active|overdue|returned`
+- `GET /` — all rentals (with unit label, type, serial and customer); optional `?status=active|overdue|returned`
 - `GET /:id` — one rental plus its condition photos
 - `GET /:id/print-data` — everything the rental agreement page needs
 - `POST /` — check out a unit, either to an existing `customer_id` or a `new_customer` created in the same transaction. Blocked (`409`) if the unit is already out, in repair, or retired
@@ -185,11 +186,16 @@ All responses are JSON shaped `{ success, message?, ...data }`.
 * Inventory of desktop and laptop units, with free-form per-unit specs and an Odoo barcode
 * Computed unit status (Available / Rented Out / Overdue / In Repair / Retired) — never stored, so it can't drift. Double-booking a unit is blocked
 * Reusable customer profiles, searchable by name or phone
+* Two ways to check out: a single-page form, or a guided one-question-at-a-time walkthrough
 * Checkout and return flows with condition photos, plus a confirmation before marking a rental returned
+* Rental extension: push the due date out, optionally with an extra charge
 * Rental fee per day, week or month, with an optional final fee for discounts
 * Security bond in AUD or RMB, kept separate everywhere — including the Analysis totals
 * One-click print of a pre-filled Rental Agreement, including the unit's specifications, with page numbers, for the customer to sign on paper. The contract text lives in `views/print-agreement.html`, so changing a clause is a plain HTML edit
+* Calendar: see which machines are out on any day, as a month calendar or a per-machine timeline, with an Activity only mode showing just start and return days
+* Status page: graphs of fleet status, upcoming due dates, Odoo sync status and activity, and growth (cumulative revenue and rentals, units out, weekly revenue by type)
 * Analysis page: date-range filter, fleet utilization, estimated revenue, bonds held per currency, average rental duration and days late, on-time vs late returns, monthly volume and revenue trends, top units and customers, and units that have never been rented
+* Every rental is mirrored to Odoo, with a check page that shows what is out of sync and can fix it (see Odoo sync below)
 * Light/dark theme toggle, matching Luxtronic's other in-house tools
 
 ### Due-date and overdue alerts to the Luxtronic Portal

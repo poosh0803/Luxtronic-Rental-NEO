@@ -16,6 +16,6 @@ Feature ideas, roughly in priority order.
 
 ## Later
 
-- [ ] **Reservations calendar** — show which units are booked for which dates so a unit can be promised before the current renter returns it.
+- [ ] **Reservations** — the Calendar page already shows rentals as they happen; still to do is booking a unit for future dates, so one can be promised before the current renter returns it.
 - [ ] **ID and signed-agreement photos** — attach a customer ID photo and a scan of the signed contract to each rental.
 - [ ] **CSV export and audit trail** — export rentals and customers, and log who changed what (the app has no login).

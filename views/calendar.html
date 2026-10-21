@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar - Luxtronic Rental</title>
+<link rel="icon" type="image/png" href="/images/logo.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="logo-container">
+    <img src="/images/logo.png" alt="Luxtronic" class="logo-img">
+    <a href="/" class="brand-name">LUXTRONIC</a>
+    <span class="tagline">Rental Tracker</span>
+  </div>
+  <div class="dark-mode-toggle" id="darkModeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
+</header>
+<nav class="nav-bar">
+  <a href="/" class="nav-item"><i class="fas fa-gauge-high"></i><span class="nav-text">Dashboard</span></a>
+  <a href="/inventory" class="nav-item"><i class="fas fa-desktop"></i><span class="nav-text">Inventory</span></a>
+  <a href="/customers" class="nav-item"><i class="fas fa-users"></i><span class="nav-text">Customers</span></a>
+  <a href="/rental-history" class="nav-item"><i class="fas fa-clock-rotate-left"></i><span class="nav-text">History</span></a>
+  <a href="/calendar" class="nav-item"><i class="fas fa-calendar-days"></i><span class="nav-text">Calendar</span></a>
+  <a href="/analysis" class="nav-item"><i class="fas fa-chart-column"></i><span class="nav-text">Analysis</span></a>
+  <a href="/status" class="nav-item"><i class="fas fa-chart-pie"></i><span class="nav-text">Status</span></a>
+  <a href="/odoo-sync" class="nav-item"><i class="fas fa-rotate"></i><span class="nav-text">Odoo</span></a>
+  <a href="/new-rental" class="nav-item nav-item-accent"><i class="fas fa-plus"></i><span class="nav-text">New Rental</span></a>
+</nav>
+<main>
+  <h1>Calendar</h1>
+  <p class="subtitle">Which machines are out on rental, day by day.</p>
+  <div id="loadError"></div>
+
+  <div class="panel">
+    <div class="cal-toolbar">
+      <div class="cal-nav">
+        <button class="btn btn-sm" id="prevBtn" aria-label="Previous month"><i class="fas fa-chevron-left"></i></button>
+        <h2 id="monthLabel" style="margin:0; min-width:150px; text-align:center;"></h2>
+        <button class="btn btn-sm" id="nextBtn" aria-label="Next month"><i class="fas fa-chevron-right"></i></button>
+        <button class="btn btn-sm" id="todayBtn">Today</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-toggle" id="activityBtn" aria-pressed="false"><i class="fas fa-bolt"></i> Activity only</button>
+      <div class="tab-filters" id="viewTabs">
+        <button type="button" class="tab-btn active" data-view="calendar">Calendar</button>
+        <button type="button" class="tab-btn" data-view="timeline">Timeline</button>
+      </div>
+      </div>
+    </div>
+
+    <div class="cal-legend">
+      <span id="legendOut" style="display:contents;">
+        <span><i class="cal-dot desktop"></i>Desktop</span>
+        <span><i class="cal-dot laptop"></i>Laptop</span>
+        <span><i class="cal-dot overdue"></i>Overdue</span>
+      </span>
+      <span id="legendActivity" style="display:none;">
+        <span><i class="cal-dot ev-start"></i>▶ Starts</span>
+        <span><i class="cal-dot ev-returned"></i>◀ Returned</span>
+        <span><i class="cal-dot ev-due"></i>◀ Due back</span>
+        <span><i class="cal-dot ev-overdue"></i>◀ Overdue, due back</span>
+      </span>
+      <span class="cal-summary" id="summary"></span>
+    </div>
+
+    <div id="calendarView"></div>
+    <div id="timelineView" style="display:none;"></div>
+  </div>
+
+  <div class="panel" id="dayPanel" style="display:none;">
+    <h2 id="dayTitle"></h2>
+    <table>
+      <thead><tr id="dayHead"><th>Machine</th><th>Type</th><th>Customer</th><th>Period</th><th></th></tr></thead>
+      <tbody id="dayBody"></tbody>
+    </table>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script src="/js/calendar.js"></script>
+</body>
+</html>

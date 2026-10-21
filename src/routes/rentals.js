@@ -39,7 +39,7 @@ const upload = multer({ storage });
 router.get('/', async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT r.*, u.label AS unit_label, u.type AS unit_type, c.full_name AS customer_name, c.phone AS customer_phone
+      SELECT r.*, u.label AS unit_label, u.type AS unit_type, u.serial_number AS unit_serial, c.full_name AS customer_name, c.phone AS customer_phone
       FROM rentals r
       JOIN units u ON u.id = r.unit_id
       JOIN customers c ON c.id = r.customer_id
