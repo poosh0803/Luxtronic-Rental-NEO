@@ -44,13 +44,13 @@ async function load() {
     }
 
     document.getElementById('unitInfo').innerHTML = `
-      <div><strong>${escapeHtml(rental.unit_label)}</strong> (${rental.unit_type === 'laptop' ? 'Laptop' : 'Desktop'})</div>
+      <div><strong><a href="/unit-detail?id=${rental.unit_id}">${escapeHtml(rental.unit_label)}</a></strong> (${rental.unit_type === 'laptop' ? 'Laptop' : 'Desktop'})</div>
       <div>Serial: ${escapeHtml(rental.serial_number) || '-'}</div>
       ${specsList(rental.specs)}
     `;
 
     document.getElementById('customerInfo').innerHTML = `
-      <div><strong>${escapeHtml(rental.customer_name)}</strong></div>
+      <div><strong><a href="/customers?id=${rental.customer_id}">${escapeHtml(rental.customer_name)}</a></strong></div>
       <div>${escapeHtml(rental.customer_phone) || '-'}</div>
       <div>${escapeHtml(rental.customer_address) || '-'}</div>
     `;

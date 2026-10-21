@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
 import { UNIT_SELECT_WITH_OPEN_RENTAL, attachStatus } from '../utils/unitStatus.js';
+import { estimateRevenue } from '../utils/revenue.js';
 
 const router = express.Router();
 
@@ -34,7 +35,15 @@ router.get('/:id', async (req, res) => {
        WHERE r.unit_id = $1 ORDER BY r.start_date DESC`,
       [req.params.id]
     );
-    res.json({ success: true, unit: attachStatus(rows[0]), rentals });
+    const perRental = rentals.map((r) => ({ id: r.id, revenue: estimateRevenue(r) }));
+    const total = perRental.reduce((sum, r) => sum + r.revenue, 0);
+    const revenue = {
+      total: Math.round(total * 100) / 100,
+      rentalCount: rentals.length,
+      avgPerRental: rentals.length ? Math.round((total / rentals.length) * 100) / 100 : 0,
+      perRental,
+    };
+    res.json({ success: true, unit: attachStatus(rows[0]), rentals, revenue });
   } catch (error) {
     console.error('Database error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch unit', error: error.message });

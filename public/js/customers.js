@@ -56,6 +56,8 @@ window.showCustomer = async function (id) {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadCustomers();
+  const openId = new URLSearchParams(window.location.search).get('id');
+  if (openId) window.showCustomer(openId);
   document.getElementById('searchInput').addEventListener('input', (e) => {
     clearTimeout(searchTimer);
     const value = e.target.value;

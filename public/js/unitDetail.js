@@ -12,7 +12,7 @@ function specsList(specs) {
 document.addEventListener('DOMContentLoaded', async () => {
   const id = getUnitId();
   try {
-    const { unit, rentals } = await fetchJSON(`/api/units/${id}`);
+    const { unit, rentals, revenue } = await fetchJSON(`/api/units/${id}`);
 
     document.getElementById('pageTitle').textContent = unit.label;
     document.getElementById('pageSubtitle').textContent = `${unit.type === 'laptop' ? 'Laptop' : 'Desktop'} — ${escapeHtml(unit.serial_number) || 'no serial recorded'}`;
@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       <div>Odoo Barcode: ${escapeHtml(unit.odoo_barcode) || '-'}</div>
       <div>Accessories: ${escapeHtml(unit.accessories) || '-'}</div>
       ${specsList(unit.specs)}
+    `;
+
+    const revenueByRental = new Map((revenue.perRental || []).map((r) => [r.id, r.revenue]));
+    document.getElementById('revenueInfo').innerHTML = `
+      <div><strong>Total Revenue:</strong> $${revenue.total.toFixed(2)}</div>
+      <div><strong>Rentals:</strong> ${revenue.rentalCount}</div>
+      <div><strong>Average per Rental:</strong> $${revenue.avgPerRental.toFixed(2)}</div>
     `;
 
     const historyBody = document.getElementById('historyBody');
@@ -36,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td>${formatDate(r.due_date)}</td>
           <td>${r.returned_at ? formatDate(r.returned_at) : '-'}</td>
           <td>${r.rental_fee ? '$' + Number(r.rental_fee).toFixed(2) + '/' + r.fee_frequency : '-'}</td>
+          <td>${revenueByRental.get(r.id) ? '$' + revenueByRental.get(r.id).toFixed(2) : '-'}</td>
           <td>${r.security_bond ? '$' + Number(r.security_bond).toFixed(2) : '-'}</td>
         </tr>`
       )
