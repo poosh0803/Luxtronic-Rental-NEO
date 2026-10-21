@@ -57,6 +57,7 @@ async function load() {
 
     document.getElementById('termsInfo').innerHTML = `
       <div><strong>Period:</strong> ${formatDate(rental.start_date)} to ${formatDate(rental.due_date)}</div>
+      ${rental.returned_at ? '' : sundayWarningHtml(rental.due_date)}
       <div><strong>Fee:</strong> ${rental.rental_fee ? '$' + Number(rental.rental_fee).toFixed(2) + ' per ' + rental.fee_frequency : '-'}</div>
       <div><strong>Final Rental Fee:</strong> ${rental.final_fee ? '$' + Number(rental.final_fee).toFixed(2) : '-'}</div>
       <div><strong>Security Bond:</strong> ${rental.security_bond ? formatMoney(rental.security_bond, rental.security_bond_currency) : '-'}</div>
@@ -186,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const due = new Date(currentRental.due_date);
     due.setDate(due.getDate() + 7);
     document.getElementById('extendDueDate').value = toDateInputValue(due);
+    refreshSundayWarnings();
     document.getElementById('extendExtraFee').value = '';
     document.getElementById('extendError').innerHTML = '';
     document.getElementById('rentalEditForm').style.display = 'none';
@@ -219,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('extendForm').style.display = 'none';
     document.getElementById('editStartDate').value = toDateInputValue(currentRental.start_date);
     document.getElementById('editDueDate').value = toDateInputValue(currentRental.due_date);
+    refreshSundayWarnings();
     document.getElementById('editRentalFee').value = currentRental.rental_fee || '';
     document.getElementById('editFeeFrequency').value = currentRental.fee_frequency || 'day';
     document.getElementById('editFinalFee').value = currentRental.final_fee || '';

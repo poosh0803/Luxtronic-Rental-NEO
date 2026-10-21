@@ -216,7 +216,7 @@ function renderReview() {
     )
   );
   rows.push(section('Unit', 2, row('Unit', selectedUnitLabel)));
-  rows.push(section('Rental Period', 3, row('Start Date', formData.start_date) + row('Due Date', formData.due_date)));
+  rows.push(section('Rental Period', 3, row('Start Date', formData.start_date) + row('Due Date', formData.due_date) + sundayWarningHtml(formData.due_date)));
   rows.push(
     section('Rental Fee', 4, row('Rate', formData.rental_fee ? '$' + Number(formData.rental_fee).toFixed(2) + ' per ' + formData.fee_frequency : '-'))
   );

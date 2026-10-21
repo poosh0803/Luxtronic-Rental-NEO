@@ -165,8 +165,52 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// We are closed on Sundays. A Sunday return date is still allowed (customers usually
+// return on the Monday, which would otherwise show as a late return), but we warn.
+const SUNDAY_WARNING_TEXT = 'This due date is a Sunday and we are closed. The customer will most likely return on Monday, which will show as a late return.';
+
+function isSundayDate(value) {
+  if (!value) return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value));
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(value);
+  return !Number.isNaN(d.getTime()) && d.getDay() === 0;
+}
+
+function sundayWarningHtml(value) {
+  return isSundayDate(value) ? `<div class="alert alert-warn sunday-warning" style="margin-top:8px;">${SUNDAY_WARNING_TEXT}</div>` : '';
+}
+
+function refreshSundayWarning(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const warnId = inputId + 'SundayWarning';
+  let el = document.getElementById(warnId);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = warnId;
+    input.insertAdjacentElement('afterend', el);
+  }
+  el.innerHTML = sundayWarningHtml(input.value);
+}
+
+const SUNDAY_WARNING_INPUTS = ['dueDate', 'extendDueDate', 'editDueDate'];
+
+function refreshSundayWarnings() {
+  SUNDAY_WARNING_INPUTS.forEach(refreshSundayWarning);
+}
+
+function initSundayWarnings() {
+  SUNDAY_WARNING_INPUTS.forEach((id) => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener('input', () => refreshSundayWarning(id));
+    input.addEventListener('change', () => refreshSundayWarning(id));
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   highlightNav();
+  initSundayWarnings();
   initDarkMode();
   initNewRentalChooser();
 });
